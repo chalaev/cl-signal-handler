@@ -1,0 +1,2 @@
+Simple way for foreign (e.g., shell) code to send messages to LISP services.
+For those who don't want to use D-Bus.

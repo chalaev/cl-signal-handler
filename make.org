@@ -1,0 +1,53 @@
+* example.bin – end of compilation
+...many more similar messages here...
+WARNING: redefining UIOP/CONFIGURATION:IN-SYSTEM-CONFIGURATION-DIRECTORY in DEFUN
+WARNING: redefining UIOP/BACKWARD-DRIVER:VERSION-COMPATIBLE-P in DEFUN
+WARNING: redefining PERFORM (#<STANDARD-CLASS ASDF/BUNDLE:IMAGE-OP> #<STANDARD-CLASS ASDF/SYSTEM:SYSTEM>) in DEFMETHOD
+[undoing binding stack and other enclosing state... done]
+[performing final GC... done]
+[defragmenting immobile space... (fin,inst,fdefn,code,sym)=1542+1429+21140+22408+26355... done]
+[saving current Lisp image into /home/shalaev/quicklisp/local-projects/signal-handler/example.bin:
+writing 0 bytes from the read-only space at 0x50000000
+compressed 0 bytes into 8 at level -1
+writing 816 bytes from the static space at 0x50100000
+compressed 32768 bytes into 345 at level -1
+writing 37322752 bytes from the dynamic space at 0x1000000000
+compressed 37322752 bytes into 8249700 at level -1
+writing 2232320 bytes from the immobile space at 0x50200000
+compressed 2260992 bytes into 622907 at level -1
+writing 14225408 bytes from the immobile space at 0x52000000
+compressed 14254080 bytes into 4472479 at level -1
+done]
+
+* Makefile messages
+chgrp tmp /home/shalaev/quicklisp/local-projects/signal-handler/example.bin
+cp -a /home/shalaev/quicklisp/local-projects/signal-handler/example.bin generated/example.bin
+rm -r /tmp/sbcl.lock/acceptor
+rm: cannot remove '/tmp/sbcl.lock/acceptor': No such file or directory
+make: [Makefile:11: tell] Error 1 (ignored)
+generated/example.bin & echo "Makefile--> PID=$!"
+Makefile--> PID=30566
+generated/tell
+
+* Messages from the code
+lisp code says that its PID=30566
+kill -s USR1 30566
+
+Now let us ensure that our message has been delivered.
+1th check: waiting for the LISP code that must delete /tmp/sbcl.lock/acceptor/by
+
+After 1/10 seconds, the message was delivered.
+all done, ready for more messages
+
+11/17 10:34:24.004 DEBUG SHE created /tmp/sbcl.lock/pid
+11/17 10:34:24.004 DEBUG SH Started, now waiting for the kill signals.
+11/17 10:34:24.004 DEBUG SH registering the hook "acceptor"
+11/17 10:34:24.004 DEBUG SH already started, won't start for the second time
+11/17 10:34:24.004 DEBUG SHE started simple-handler service
+11/17 10:34:24.004 INFO SHE will accept messages for the next 3 seconds
+11/17 10:34:24.076 INFO SH found the directory acceptor, will now read the file
+11/17 10:34:24.076 INFO SHE killer told me: "Message: the time now is Вт ноя 17 10:34:24 EST 2020"
+11/17 10:34:24.076 DEBUG SH received the message "Message: the time now is Вт ноя 17 10:34:24 EST 2020", erasing the file /tmp/sbcl.lock/acceptor/by
+11/17 10:34:27.004 INFO SHE time is up, hook is removed, messages are ignored from now
+
+*Note that log messages from the LISP code were delayed with respect to the echoed text from the shell.*

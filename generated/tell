@@ -1,0 +1,48 @@
+#!/bin/bash
+dir=/tmp/sbcl.lock
+PIDfile=$dir/pid
+lock=$dir/acceptor
+message=$lock/by
+
+function waitForFile {
+local i=20
+local r
+while [ ! -f $1 ]  && [ $i -ge 0 ] || r=`awk '{if($2=="ok"){print $1}}' $1` && [ -z $r ]  ; do
+	i=$(($i - 1))
+	sleep .1
+done
+echo $r
+}
+lispPID=`waitForFile $PIDfile`
+if [ -z $lispPID ]; then
+    echo "lisp code did not create PID file, exiting"
+    exit -1
+else
+
+echo "lisp code says that its PID=$lispPID"
+i=20
+while  [ $i -ge 0 ] && ! (mkdir "$lock" 2>/dev/null && echo "Message: the time now is `date`" > $message) ; do
+    echo "${i}th attempt to mkdir failed -- waiting until the lock is removed"
+    i=$(($i - 1))
+    sleep .1
+done
+
+echo "kill -s USR1 $lispPID"
+kill -s USR1 $lispPID
+
+echo "Now let us ensure that our message has been delivered."
+j=20
+while [ -f $message ]  && [ $j -ge 0 ] ; do
+    echo "$((21-${j}))th check: waiting for the LISP code that must delete $message"
+    j=$(($j - 1))
+    sleep .1
+done
+rmdir $lock
+if [ $j -ge 0 ]; then
+    echo "After $((40-$i-$j))/10 seconds, the message was delivered."
+else
+    echo "The message was NOT delivered!"
+fi
+
+echo "all done, ready for more messages"
+fi
