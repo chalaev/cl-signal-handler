@@ -9,13 +9,13 @@ While this code is still not mature, [[https://github.com/chalaev/cl-simple-logg
 For example, I have =quicklisp= installed in =~/quicklisp/= so [[https://github.com/chalaev/cl-simple-logger][simple-log]] is available in =~/quicklisp/local-projects/simple-log/=.
 
 * Quick start – usage example
-Then =make= compiles the binary =example.bin= and launches it in background.
+=make= compiles the binary =example.bin= and launches it in background.
 It is a server that will "listen" for =kill= signals for a few seconds.
 
 LISP services may register one or more ~hooks~ using =(sh:register sdir func)=,
 where =dir= is the name of the lock (sub)directory.
 
-The shell script =generated/tell= is a client that
+The shell script [[file:generated/tell][tell]] is a client that
 1. creates lock directory to let other clients know that they should not interfere until the current conversation with the server is over,
 2. saves a message in a file "by", and
 3. sends =kill= signal to the server thus letting it know that the message is ready to be read.
@@ -30,11 +30,11 @@ In this way the sender is notified that the message has been received,
 and now the sender must delete the sub-directory =sdir= in order to allow others to send messages to LISP code.
 
 * Files
-1. ~signal-handler.org~ is the main file containing most of the code with comments.
+1. [[file:signal-handler.org][signal-handler.org]] is the main file containing most of the code with comments.
 2. The files in [[file:goodies/][goodies/]] are copied from the [[https://notabug.org/shalaev/lisp-goodies][lisp-goodies]] project.
-3. =Makefile= compiles ~generated/example.lisp~ into ~generated/example.bin~ and launches it.
-4. Other files in ~generated/~ can be produced by emacs from ~signal-handler.org~ using either =make= or =M-x org-babel-tangle=.
-5. ~make.log~ shows the log messages displayed by =make= command.
+3. [[file:Makefile][Makefile]] compiles [[file:generated/example.lisp][generated/example.lisp]] into ~generated/example.bin~ and launches it.
+4. Other files in [[file:generated][generated/]] can be produced by ~emacs~ from [[file:signal-handler.org][signal-handler.org]] using either =make= or =M-x org-babel-tangle=.
+5. [[file:make.org][make.org]] shows the log messages displayed by =make= command.
 
 * Motivation
 [[https://github.com/death/dbus][dbus]] might have many fancy features, but on my computer =(ql:quickload :dbus)= downloads 55 other packages to satisfy [[https://github.com/death/dbus][dbus]]'es requirements,

@@ -1,4 +1,4 @@
-#+TITLE: sending messages to Common Lisp (sbcl) programs from foreign code (e.g., shell) using `kill -SIGUSR1 $pid`
+#+TITLE: sending messages to Common Lisp (sbcl) programs from foreign code (e.g., shell) using `kill -s USR1 $pid`
 #+AUTHOR: Oleg Shalaev
 #+EMAIL:  oleg@chalaev.com
 #+LaTeX_HEADER: \usepackage[english,russian]{babel}
@@ -101,7 +101,7 @@ Now that we have defined the callback by =cffi:defcallback= we can use it (not v
   (log-SH sl:debug "Started, now waiting for the kill signals.")
 (setf *started* t)))
 #+END_SRC
-To be re-checked: previously I noticed that the log messages were temporarily blocked with this code, and suspected that
+I noticed that the log messages were temporarily blocked with this code, and suspect that
 this may happen due to the wrong (too strict) value of =iolib.syscalls:sa-siginfo=.
 
 * Handlers: register and forget
@@ -158,8 +158,8 @@ we should remove the =(eval-when ..)= wrapper.
 Every time the kill-signal is sent, the following (toy) function will be called:
 #+BEGIN_SRC lisp :tangle generated/example.lisp
 (defun wachter(message)
-  "An example kill-signal handler. Its argument is a nessage from the killer."
-  (log-SHE sl:info "killer told me: ~s" message) T)
+  "An example kill-signal handler. Its argument is a message from the killer."
+  (log-SHE sl:info "my killer told me: ~s" message) T)
 #+END_SRC
 ←  handler must return T.
 
@@ -268,14 +268,14 @@ Now in case someone else is talking to =example.bin=, let us wait until (s)he re
 #+BEGIN_SRC shell :tangle generated/tell
 echo "lisp code says that its PID=$lispPID"
 i=20
-while  [ $i -ge 0 ] && ! (mkdir "$lock" 2>/dev/null && echo "Message: the time now is `date`" > $message) ; do
-    echo "${i}th attempt to mkdir failed -- waiting until the lock is removed"
+while  [ $i -ge 0 ] && ! (mkdir "$lock" 2>/dev/null && echo "Let me tell you something: the time now is `date`" > $message) ; do
+    echo "$((21-$i))th attempt to mkdir failed -- waiting until the lock is removed"
     i=$(($i - 1))
     sleep .1
 done
 #+END_SRC
 
-Let us niw tell the LISP code (=example.bin=) to read the message:
+Let us now tell the LISP code (=example.bin=) to read the message:
 #+BEGIN_SRC shell :tangle generated/tell
 echo "kill -s USR1 $lispPID"
 kill -s USR1 $lispPID
@@ -285,7 +285,7 @@ kill -s USR1 $lispPID
 echo "Now let us ensure that our message has been delivered."
 j=20
 while [ -f $message ]  && [ $j -ge 0 ] ; do
-    echo "$((21-${j}))th check: waiting for the LISP code that must delete $message"
+    echo "$((21-$j))th check: waiting for the LISP code that must delete $message"
     j=$(($j - 1))
     sleep .1
 done
@@ -303,6 +303,3 @@ Or we could just finish the conversation by removing the lock (directory):
 echo "all done, ready for more messages"
 fi
 #+END_SRC
-
-* Debug
-Dinally there is a problem to choose the right PID.
