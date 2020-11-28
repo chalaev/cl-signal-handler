@@ -21,8 +21,8 @@ else
 
 echo "lisp code says that its PID=$lispPID"
 i=20
-while  [ $i -ge 0 ] && ! (mkdir "$lock" 2>/dev/null && echo "Message: the time now is `date`" > $message) ; do
-    echo "${i}th attempt to mkdir failed -- waiting until the lock is removed"
+while  [ $i -ge 0 ] && ! (mkdir "$lock" 2>/dev/null && echo "Let me tell you something: the time now is `date`" > $message) ; do
+    echo "$((21-$i))th attempt to mkdir failed -- waiting until the lock is removed"
     i=$(($i - 1))
     sleep .1
 done
@@ -33,7 +33,7 @@ kill -s USR1 $lispPID
 echo "Now let us ensure that our message has been delivered."
 j=20
 while [ -f $message ]  && [ $j -ge 0 ] ; do
-    echo "$((21-${j}))th check: waiting for the LISP code that must delete $message"
+    echo "$((21-$j))th check: waiting for the LISP code that must delete $message"
     j=$(($j - 1))
     sleep .1
 done

@@ -1,0 +1,56 @@
+*Packaging*
+
+* Main package
+#+BEGIN_SRC lisp :tangle generated/signal-handler.asd
+(defsystem "signal-handler"
+ :description "listen to the USR1 kill signal and read the killer's message"
+ :long-description #.(uiop:read-file-string (uiop/pathname:subpathname *load-pathname* "description.org"))
+ :author "Oleg Shalaev"
+ :mailto "oleg@chalaev.com"
+ :licence "MIT"
+ :version (:read-file-line "version.org")
+ :depends-on (:iolib :cffi :simple-log :uiop :shalaev)
+ :components ((:file "signal-handler")))
+#+END_SRC
+
+#+BEGIN_SRC lisp :tangle generated/headers/signal-handler.lisp
+;;(declaim (optimize (speed 3) (safety 0)))
+(defpackage :signal-handler
+    (:nicknames "SH") ;(:nicknames :SH)
+    (:use :cl :shalaev/macros :shalaev/files)
+    (:export :register :forget :forget-all :lock-dir :start))
+(in-package :signal-handler)
+#+END_SRC
+
+* Example
+Declaring example package in the same (main) =.asd= file:
+#+BEGIN_SRC lisp :tangle generated/signal-handler.asd
+(defsystem "signal-handler/example"
+:depends-on (:signal-handler)
+#+END_SRC
+
+3 next lines serve to assist with building binary image:
+#+BEGIN_SRC lisp :tangle generated/signal-handler.asd
+:build-operation  "program-op"
+:build-pathname "example.bin"
+:entry-point "signal-handler/example:main"
+#+END_SRC
+where ~:build-pathname~ is relative to the package placement
+(for my ~quicklisp~, it would be =~/quicklisp/local-projects/signal-handler/=).
+
+#+BEGIN_SRC lisp :tangle generated/signal-handler.asd
+:description "an example for signal-handler"
+:author "Oleg Shalaev"
+:mailto "oleg@chalaev.com"
+:licence "MIT"
+:version (:read-file-line "version.org")
+:components ((:file "example")))
+#+END_SRC
+
+#+BEGIN_SRC lisp :tangle generated/headers/example.lisp :shebang ";; generated from .org"
+;;(declaim (optimize (speed 3) (safety 0)))
+(defpackage :signal-handler/example
+    (:export :main)
+    (:use :cl :shalaev/macros :shalaev/files))
+(in-package :signal-handler/example)
+#+END_SRC

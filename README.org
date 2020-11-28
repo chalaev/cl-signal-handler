@@ -4,7 +4,7 @@ Simple kill-signall message acceptor for [[http://www.sbcl.org/][sbcl]].
 A simple and reliable way to send messages to LISP services.
 
 * Prerequisites
-While this code is still not mature, [[https://github.com/chalaev/cl-simple-logger][simple-log]] package is needed for debugging, so =quicklisp= should be able to find its files.
+Although this code is quite mature, [[https://github.com/chalaev/cl-simple-logger][simple-log]] package is needed for debugging, so =quicklisp= should be able to find its files.
 
 For example, I have =quicklisp= installed in =~/quicklisp/= so [[https://github.com/chalaev/cl-simple-logger][simple-log]] is available in =~/quicklisp/local-projects/simple-log/=.
 
@@ -31,10 +31,10 @@ and now the sender must delete the sub-directory =sdir= in order to allow others
 
 * Files
 1. [[file:signal-handler.org][signal-handler.org]] is the main file containing most of the code with comments.
-2. The files in [[file:goodies/][goodies/]] are copied from the [[https://notabug.org/shalaev/lisp-goodies][lisp-goodies]] project.
-3. [[file:Makefile][Makefile]] compiles [[file:generated/example.lisp][generated/example.lisp]] into ~generated/example.bin~ and launches it.
-4. Other files in [[file:generated][generated/]] can be produced by ~emacs~ from [[file:signal-handler.org][signal-handler.org]] using either =make= or =M-x org-babel-tangle=.
-5. [[file:make.org][make.org]] shows the log messages displayed by =make= command.
+2. [[file:Makefile][Makefile]] compiles [[file:generated/example.lisp][generated/example.lisp]] into ~generated/example.bin~ and launches it.
+3. Other files in [[file:generated][generated/]] can be produced by ~emacs~ from [[file:signal-handler.org][signal-handler.org]] using either =make= or =M-x org-babel-tangle=.
+4. [[file:make.org][make.org]] shows the log messages displayed by =make= command.
+5. [[file:helpers/][helpers/*]] assist compilation.
 
 * Motivation
 [[https://github.com/death/dbus][dbus]] might have many fancy features, but on my computer =(ql:quickload :dbus)= downloads 55 other packages to satisfy [[https://github.com/death/dbus][dbus]]'es requirements,

@@ -1,17 +1,3 @@
-;; generated from signal-handler.org
-;;(declaim (optimize (speed 3) (safety 0)))
-(defpackage :signal-handler
-    ;;(:nicknames :SH)
-    (:nicknames "SH")
-    (:use :cl)
-    (:export :register :forget :forget-all :lock-dir :start))
-(in-package :signal-handler)
-
-(eval-when (:compile-toplevel :load-toplevel);  :execute
-(let ((goodies/ (uiop:ensure-directory-pathname "goodies")))
-(mapcar #'(lambda(FN) (load (merge-pathnames FN goodies/)))
-'(#p"macros.lisp" #p"functions.lisp" #p"file-functions.lisp"))))
-
 (defvar *started* nil)
 (defvar lock-dir (ensure-directories-exist
 

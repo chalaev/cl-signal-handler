@@ -1,0 +1,13 @@
+Change log for [[https://github.com/chalaev/cl-signal-handler][cl-signal-handler]].
+
+* Almost stable
+This code was written 2+ years before it was packaged and published, so I do not expect it to be changed a lot.
+
+** Packaged and compiled
+There are no built-in tests (defined with =deftest=) here; they are replaced by an example.
+
+*** 2020-11-28
+Added [[file:change-log.org][change-log.org]].
+
+*** 2020-11-26
+Started using my [[https://github.com/chalaev/lisp-goodies][lisp-goodies]] (:shalaev) package instead of including its files into the source code.

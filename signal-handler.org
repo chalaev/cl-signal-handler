@@ -4,25 +4,6 @@
 #+LaTeX_HEADER: \usepackage[english,russian]{babel}
 #+LATEX_HEADER: \usepackage[letterpaper,hmargin={1.5cm,1.5cm},vmargin={1.3cm,2cm},nohead,nofoot]{geometry}
 
-* Initialization
-#+BEGIN_SRC lisp :tangle generated/signal-handler.lisp :shebang ";; generated from signal-handler.org"
-;;(declaim (optimize (speed 3) (safety 0)))
-(defpackage :signal-handler
-    ;;(:nicknames :SH)
-    (:nicknames "SH")
-    (:use :cl)
-    (:export :register :forget :forget-all :lock-dir :start))
-(in-package :signal-handler)
-#+END_SRC
-Without =:load-toplevel=, ~signal-handler/example~ will be sucessfully compiled,
-but during the runtime will complain that the function =merge-pathnames= is undefined:
-#+BEGIN_SRC lisp :tangle generated/signal-handler.lisp
-(eval-when (:compile-toplevel :load-toplevel);  :execute
-(let ((goodies/ (uiop:ensure-directory-pathname "goodies")))
-(mapcar #'(lambda(FN) (load (merge-pathnames FN goodies/)))
-'(#p"macros.lisp" #p"functions.lisp" #p"file-functions.lisp"))))
-#+END_SRC
-
 Maybe I should use my old [[https://github.com/chalaev/cl-libconfig][cl-libconfig]] instead of all these =defvar=:
 #+BEGIN_SRC lisp :tangle generated/signal-handler.lisp
 (defvar *started* nil)
@@ -130,25 +111,6 @@ It will be evaluated when someone
 #+END_SRC
 
 * Example
-#+BEGIN_SRC lisp :tangle generated/example.lisp :shebang ";; generated from .org"
-;;(declaim (optimize (speed 3) (safety 0)))
-(defpackage :signal-handler/example
-    (:export :main)
-    (:use :cl))
-(in-package :signal-handler/example)
-#+END_SRC
-
-The following =(eval-when ..)= is necessary when the code in ~generated/example.lisp~
-is called via =(require :signal-handler/example)=:
-#+BEGIN_SRC lisp :tangle generated/example.lisp
-(eval-when (:compile-toplevel :load-toplevel) ; :execute
-  (let ((goodies/ (uiop:ensure-directory-pathname "goodies")))
-    (mapcar #'(lambda(FN) (load (merge-pathnames FN goodies/)))
-    '(#p"macros.lisp" #p"functions.lisp" #p"file-functions.lisp"))))
-#+END_SRC
-← if we try to load ~generated/example.lisp~ as an ordinary source file instead,
-we should remove the =(eval-when ..)= wrapper.
-
 #+BEGIN_SRC lisp :tangle generated/example.lisp
 (defun log-SHE (type &rest message)
     (apply #'sl:log
@@ -191,52 +153,6 @@ Let the killers know whom to kill by creating ~pid~ file:
 (log-SHE sl:info "erased ~a" pid-FN)))
 #+END_SRC
 
-* Packaging
-** Main package
-#+END_SRC
-#+BEGIN_SRC lisp :tangle generated/signal-handler.asd
-(asdf:defsystem "signal-handler"
- :description "listen to the USR1 kill signal and read the killer's message"
- :long-description #.(uiop:read-file-string (uiop/pathname:subpathname *load-pathname* "description.org"))
- :author "Oleg Shalaev"
- :mailto "oleg@chalaev.com"
- :licence "MIT"
- :version "0"
- :depends-on (:iolib :cffi :simple-log :uiop)
-;; :in-order-to ((test-op (test-op :signal-handler/tests)))
-:serial t
-:components (
-(:file "goodies/macros")
-(:file "goodies/functions")
-(:file "goodies/file-functions")
-(:file "signal-handler")))
-#+END_SRC
-
-** Example
-Declaring example package in the same (main) =.asd= file:
-#+BEGIN_SRC lisp :tangle generated/signal-handler.asd
-(asdf:defsystem "signal-handler/example"
-:depends-on (:signal-handler)
-#+END_SRC
-
-3 next lines serve to assist with building binary image:
-#+BEGIN_SRC lisp :tangle generated/signal-handler.asd
-:build-operation  "program-op"
-:build-pathname "example.bin"
-:entry-point "signal-handler/example:main"
-#+END_SRC
-where ~:build-pathname~ is relative to the package placement
-(for my ~quicklisp~, it would be =~/quicklisp/local-projects/signal-handler/=).
-
-#+BEGIN_SRC lisp :tangle generated/signal-handler.asd
-:description "an example for signal-handler"
-:author "Oleg Shalaev"
-:mailto "oleg@chalaev.com"
-:licence "MIT"
-:version "0"
-:components ((:file "example")))
-#+END_SRC
-
 * Usage
 First of all let us ensure that =example.bin= started and created the file with its PID:
 #+BEGIN_SRC shell :tangle generated/tell :shebang "#!/bin/bash"
@@ -246,7 +162,7 @@ lock=$dir/acceptor
 message=$lock/by
 #+END_SRC
 
-#+BEGIN_SRC shell :tangle generated/tell :shebang "#!/bin/bash"
+#+BEGIN_SRC shell :tangle generated/tell
 function waitForFile {
 local i=20
 local r

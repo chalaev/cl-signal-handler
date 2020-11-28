@@ -1,43 +1,77 @@
-SH=/bin/sh
-# The parameters SBCL and quicklispDir should probably be different on your computer:
-# SBCL is the SBCL excecutable. You may use the standard one (/usr/bin/sbcl), but it is better to compile it manually.
 SBCL = ~/local/bin/sbcl
-# quicklispDir is the Quicklisp directory where my local packages are stored:
-quicklispDir = ~/quicklisp/local-projects/signal-handler/
+# where my local packages are stored:
+quicklispDir = $$HOME/quicklisp/local-projects/signal-handler
 
-# simple: README.md generated/example.bin generated/description.org
+LFNs = signal-handler example
+LISPs = $(addsuffix .lisp, $(LFNs))
+package = $(LISPs) signal-handler.asd description.org version.org
 
-tell: generated/example.bin README.md
+OFNs = signal-handler packaging
+ORGs = $(addsuffix .org, $(OFNs))
+
+#SH=/bin/sh
+
+all: quicklisp README.md generated/signal-handler.tbz $(addprefix generated/from/, $(ORGs)) $(quicklispDir)/example.bin demo git
+quicklisp: $(quicklispDir)/ $(addprefix $(quicklispDir)/, $(package)) $(addprefix generated/from/, $(ORGs))
+
+demo: $(quicklispDir)/example.bin generated/from/signal-handler.org
 	-rm -r /tmp/sbcl.lock/acceptor
-	generated/example.bin & echo "Makefile--> PID=$$!"
+	$(quicklispDir)/example.bin & echo "Makefile--> PID=$$!"
 	generated/tell
 
-generated/example.bin: $(quicklispDir)example.bin
-	cp -a $< $@
+$(quicklispDir)/example.bin: quicklisp generated/description.org
+	@echo "*** COMPILING THE BINARY ***"
+	$(SBCL) --quit --eval "(asdf:make :signal-handler/example)"
+	@echo "\n*** COMPILED THE BINARY, ***\nwill launch the DEMO now\n*****"
+	-@chgrp tmp $@
 
-# компилирование пакета :signal-handler после каждого обновления:
-generated/signal-handler.lisp: signal-handler.org
-	emacsclient -e '(org-babel-tangle-file "$<")'
-	-chmod a-x generated/*.lisp
-	rsync -au goodies generated/*.lisp generated/*.asd description.org $(quicklispDir)
-	cd $(quicklispDir) ; $(SBCL) --quit --eval '(progn (asdf:clear-system :signal-handler) (asdf:clear-system :signal-handler/example) (require :signal-handler/example))' ; cd -
+generated/signal-handler.tbz: quicklisp
+	@echo "Testing before we package it:"
+	tar jcfv $@ --directory=$(quicklispDir)/..  signal-handler
+	-@chgrp tmp $@
 
 generated/description.org: description.org
-	rsync -au $< $@
-	-chgrp tmp $@
-	-chmod a-x $@
+	cat $< > $@
+	-@chgrp tmp $@
+
+$(quicklispDir)/%.lisp: generated/from/signal-handler.org generated/from/packaging.org
+	cat generated/headers/$(notdir $@) generated/$(notdir $@) > $@
+	-@chgrp tmp $@
+
+$(quicklispDir)/%.asd: generated/from/packaging.org
+	cat generated/$(notdir $@) > $@
+	-@chgrp tmp $@
+
+$(quicklispDir)/%.org: %.org
+	cat $< > $@
+	-@chgrp tmp $@
+
+generated/from/%.org: %.org generated/from/ generated/headers/
+	echo `emacsclient -e '(printangle "$<")'` | sed 's/"//g' > $@
+	-@chgrp tmp $@ `cat $@`
 
 README.md: README.org
 	emacsclient -e '(progn (find-file "README.org") (org-md-export-to-markdown))'
-	-chgrp tmp $@
-	-chmod a-x $@
+	-@chgrp tmp $@
+	-@chmod a-x $@
 
 clean:
-	-rm -r generated/* $(quicklispDir)* ~/.cache/common-lisp/sbcl-2.0.10-linux-x64/home/shalaev/quicklisp/local-projects/signal-handler/
+	-$(SBCL) --quit --eval '(progn (asdf:clear-system :signal-handler) (asdf:clear-system :signal-handler/example))'
+	-rm -r $(quicklispDir) generated
 
-.PHONY: clean tell
+.PHONY: clean quicklisp all git demo
 
-$(quicklispDir)example.bin: generated/signal-handler.lisp generated/description.org
-	@echo "*** COMPILING THE BINARY***"
-	$(SBCL) --quit --load generated/signal-handler.asd --eval "(asdf:make :signal-handler/example)"
-	-chgrp tmp $@
+%/:
+	[ -d $@ ] || mkdir -p $@
+
+git: generated/signal-handler.tbz next-commit.txt README.md
+	@echo "===="
+	-@echo "git commit -am '"`head -n1 next-commit.txt`"'"
+	@echo "git push origin master"
+
+
+version.org: change-log.org helpers/derive-version.el
+	emacsclient -e '(progn (load "$(CURDIR)/helpers/derive-version.el") (format-version "$<"))' | sed 's/"//g' > $@
+	@echo "← generated `date '+%m/%d %H:%M'` from [[file:$<][$<]]" >> $@
+	@echo "by [[file:helpers/derive-version.el][derive-version.el]]" >> $@
+	-@chgrp tmp $@
