@@ -1,34 +1,34 @@
 
 # Table of Contents
 
-1.  [The scope](#orgbe20a81)
-2.  [Prerequisites](#org188277b)
-3.  [Quick start – usage example](#org2c406f5)
-4.  [Files](#orgead79d9)
-5.  [Motivation](#org0c52c3b)
-6.  [License](#orgcbf10da)
-7.  [Support](#org8931bd8)
+1.  [The scope](#org32f6edd)
+2.  [Prerequisites](#org638fc4b)
+3.  [Quick start – usage example](#orgd2c3ec5)
+4.  [Files](#orge0c45da)
+5.  [Motivation](#org9bef6e1)
+6.  [License](#orga99efc6)
+7.  [Support](#org14b198d)
 
 Simple kill-signall message acceptor for [sbcl](http://www.sbcl.org/).
 
 
-<a id="orgbe20a81"></a>
+<a id="org32f6edd"></a>
 
 # The scope
 
 A simple and reliable way to send messages to LISP services.
 
 
-<a id="org188277b"></a>
+<a id="org638fc4b"></a>
 
 # Prerequisites
 
-While this code is still not mature, [simple-log](https://github.com/chalaev/cl-simple-logger) package is needed for debugging, so `quicklisp` should be able to find its files.
+Although this code is quite mature, [simple-log](https://github.com/chalaev/cl-simple-logger) package is needed for debugging, so `quicklisp` should be able to find its files.
 
 For example, I have `quicklisp` installed in `~/quicklisp/` so [simple-log](https://github.com/chalaev/cl-simple-logger) is available in `~/quicklisp/local-projects/simple-log/`.
 
 
-<a id="org2c406f5"></a>
+<a id="orgd2c3ec5"></a>
 
 # Quick start – usage example
 
@@ -54,18 +54,18 @@ In this way the sender is notified that the message has been received,
 and now the sender must delete the sub-directory `sdir` in order to allow others to send messages to LISP code.
 
 
-<a id="orgead79d9"></a>
+<a id="orge0c45da"></a>
 
 # Files
 
 1.  [signal-handler.org](signal-handler.md) is the main file containing most of the code with comments.
-2.  The files in [goodies/](goodies/) are copied from the [lisp-goodies](https://notabug.org/shalaev/lisp-goodies) project.
-3.  [Makefile](Makefile) compiles [generated/example.lisp](generated/example.lisp) into `generated/example.bin` and launches it.
-4.  Other files in [generated/](generated) can be produced by `emacs` from [signal-handler.org](signal-handler.md) using either `make` or `M-x org-babel-tangle`.
-5.  [make.org](make.md) shows the log messages displayed by `make` command.
+2.  [Makefile](Makefile) compiles [generated/example.lisp](generated/example.lisp) into `generated/example.bin` and launches it.
+3.  Other files in [generated/](generated) can be produced by `emacs` from [signal-handler.org](signal-handler.md) using either `make` or `M-x org-babel-tangle`.
+4.  [make.org](make.md) shows the log messages displayed by `make` command.
+5.  [helpers/\*](helpers/) assist compilation.
 
 
-<a id="org0c52c3b"></a>
+<a id="org9bef6e1"></a>
 
 # Motivation
 
@@ -73,14 +73,14 @@ and now the sender must delete the sub-directory `sdir` in order to allow others
 which is much more than I need to satisfy my modest needs: I just need simple text message exchange between `sbcl` and other programs (including shell scripts).
 
 
-<a id="orgcbf10da"></a>
+<a id="orga99efc6"></a>
 
 # License
 
 This code is released under [MIT license](https://mit-license.org/).
 
 
-<a id="org8931bd8"></a>
+<a id="org14b198d"></a>
 
 # Support
 

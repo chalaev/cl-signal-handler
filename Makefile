@@ -26,7 +26,6 @@ $(quicklispDir)/example.bin: quicklisp generated/description.org
 	-@chgrp tmp $@
 
 generated/signal-handler.tbz: quicklisp
-	@echo "Testing before we package it:"
 	tar jcfv $@ --directory=$(quicklispDir)/..  signal-handler
 	-@chgrp tmp $@
 

@@ -1,53 +1,142 @@
-* example.bin – end of compilation
+* make begins
+[ -d $HOME/quicklisp/local-projects/signal-handler/ ] || mkdir -p $HOME/quicklisp/local-projects/signal-handler/
+[ -d generated/from/ ] || mkdir -p generated/from/
+[ -d generated/headers/ ] || mkdir -p generated/headers/
+echo `emacsclient -e '(printangle "signal-handler.org")'` | sed 's/"//g' > generated/from/signal-handler.org
+echo `emacsclient -e '(printangle "packaging.org")'` | sed 's/"//g' > generated/from/packaging.org
+cat generated/headers/signal-handler.lisp generated/signal-handler.lisp > $HOME/quicklisp/local-projects/signal-handler/signal-handler.lisp
+cat generated/headers/example.lisp generated/example.lisp > $HOME/quicklisp/local-projects/signal-handler/example.lisp
+cat generated/signal-handler.asd > $HOME/quicklisp/local-projects/signal-handler/signal-handler.asd
+cat description.org > $HOME/quicklisp/local-projects/signal-handler/description.org
+cat version.org > $HOME/quicklisp/local-projects/signal-handler/version.org
+emacsclient -e '(progn (find-file "README.org") (org-md-export-to-markdown))'
+"README.md"
+tar jcfv generated/signal-handler.tbz --directory=$HOME/quicklisp/local-projects/signal-handler/..  signal-handler
+signal-handler/
+signal-handler/version.org
+signal-handler/example.lisp
+signal-handler/signal-handler.lisp
+signal-handler/signal-handler.asd
+signal-handler/description.org
+cat description.org > generated/description.org
+
+* compiling example.bin
+~/local/bin/sbcl --quit --eval "(asdf:make :signal-handler/example)"
+This is SBCL 2.0.10, an implementation of ANSI Common Lisp.
+...
+WARNING: redefining UIOP/PACKAGE:FIND-PACKAGE* in DEFUN
+WARNING: redefining UIOP/PACKAGE:FIND-SYMBOL* in DEFUN
 ...many more similar messages here...
-WARNING: redefining UIOP/CONFIGURATION:IN-SYSTEM-CONFIGURATION-DIRECTORY in DEFUN
 WARNING: redefining UIOP/BACKWARD-DRIVER:VERSION-COMPATIBLE-P in DEFUN
 WARNING: redefining PERFORM (#<STANDARD-CLASS ASDF/BUNDLE:IMAGE-OP> #<STANDARD-CLASS ASDF/SYSTEM:SYSTEM>) in DEFMETHOD
+; compiling file "/home/shalaev/quicklisp/local-projects/signal-handler/signal-handler.lisp" (written 28 NOV 2020 06:10:30 PM):
+; processing (DEFPACKAGE :SIGNAL-HANDLER ...)
+; processing (IN-PACKAGE :SIGNAL-HANDLER)
+; processing (DEFVAR *STARTED* ...)
+; processing (DEFVAR LOCK-DIR ...)
+; processing (DEFVAR HOOKS ...)
+; processing (DEFVAR *CLIENTS* ...)
+; processing (DEFUN LOG-SH ...)
+; processing (CFFI:DEFCSTRUCT SATYPE ...)
+; processing (CFFI:DEFCALLBACK SIGHANDLER ...)
+; file: /home/shalaev/quicklisp/local-projects/signal-handler/signal-handler.lisp
+; in: CFFI:DEFCALLBACK SIGHANDLER
+;     (CFFI:DEFCALLBACK SIGNAL-HANDLER::SIGHANDLER
+;         :VOID
+;         ((SIGNUM :INT) (SIGNAL-HANDLER::INFO :POINTER)
+;          (SIGNAL-HANDLER::PTR :POINTER))
+;       (DECLARE (INTEGER SIGNUM))
+;       (WHEN (= 10 SIGNUM)
+;         (SHALAEV/MACROS:NEEDS ((SIGNAL-HANDLER::ACTIVE-HOOKS # #))
+;                               (DOLIST
+;                                   (SIGNAL-HANDLER::HOOK
+;                                    SIGNAL-HANDLER::ACTIVE-HOOKS)
+;                                 (LET #
+;                                   #
+;                                   #
+;                                   #)))))
+; --> PROGN CFFI-SYS:%DEFCALLBACK SETF LET* LET* ALIEN-SAP 
+; --> SB-ALIEN::ALIEN-LAMBDA SB-ALIEN-INTERNALS:ALIEN-CALLBACK 
+; --> SB-ALIEN-INTERNALS:%SAP-ALIEN SB-ALIEN::%ALIEN-CALLBACK-SAP LAMBDA 
+; --> FUNCTION 
+; ==>
+;   (LET ((SIGNUM SIGNUM)
+;         (SIGNAL-HANDLER::INFO SIGNAL-HANDLER::INFO)
+;         (SIGNAL-HANDLER::PTR SIGNAL-HANDLER::PTR))
+;     (DECLARE (INTEGER SIGNUM))
+;     (BLOCK SIGNAL-HANDLER::SIGHANDLER
+;       (WHEN (= 10 SIGNUM) (SHALAEV/MACROS:NEEDS (#) (DOLIST # #)))))
+; 
+; caught STYLE-WARNING:
+;   The variable INFO is defined but never used.
+; 
+; caught STYLE-WARNING:
+;   The variable PTR is defined but never used.
+
+; processing (DEFUN START ...)
+; processing (DEFUN REGISTER ...)
+; processing (DEFUN FORGET ...)
+; processing (DEFUN FORGET-ALL ...)
+
+; wrote /home/shalaev/.cache/common-lisp/sbcl-2.0.10-linux-x64/home/shalaev/quicklisp/local-projects/signal-handler/signal-handler-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.036
+WARNING:
+   Lisp compilation had style-warnings while
+   compiling #<CL-SOURCE-FILE "signal-handler" "signal-handler">
+; compiling file "/home/shalaev/quicklisp/local-projects/signal-handler/example.lisp" (written 28 NOV 2020 06:10:30 PM):
+; processing (DEFPACKAGE :SIGNAL-HANDLER/EXAMPLE ...)
+; processing (IN-PACKAGE :SIGNAL-HANDLER/EXAMPLE)
+; processing (DEFUN LOG-SHE ...)
+; processing (DEFUN WACHTER ...)
+; processing (DEFVAR TIME-INTERVAL ...)
+; processing (DEFUN MAIN ...)
+
+; wrote /home/shalaev/.cache/common-lisp/sbcl-2.0.10-linux-x64/home/shalaev/quicklisp/local-projects/signal-handler/example-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.004
 [undoing binding stack and other enclosing state... done]
 [performing final GC... done]
-[defragmenting immobile space... (fin,inst,fdefn,code,sym)=1542+1429+21140+22408+26355... done]
+[defragmenting immobile space... (fin,inst,fdefn,code,sym)=1492+1272+20667+21665+26275... done]
 [saving current Lisp image into /home/shalaev/quicklisp/local-projects/signal-handler/example.bin:
 writing 0 bytes from the read-only space at 0x50000000
 compressed 0 bytes into 8 at level -1
 writing 816 bytes from the static space at 0x50100000
-compressed 32768 bytes into 345 at level -1
-writing 37322752 bytes from the dynamic space at 0x1000000000
-compressed 37322752 bytes into 8249700 at level -1
-writing 2232320 bytes from the immobile space at 0x50200000
-compressed 2260992 bytes into 622907 at level -1
-writing 14225408 bytes from the immobile space at 0x52000000
-compressed 14254080 bytes into 4472479 at level -1
+compressed 32768 bytes into 342 at level -1
+writing 35979264 bytes from the dynamic space at 0x1000000000
+compressed 35979264 bytes into 8017038 at level -1
+writing 2183168 bytes from the immobile space at 0x50200000
+compressed 2195456 bytes into 613389 at level -1
+writing 13877248 bytes from the immobile space at 0x52000000
+compressed 13893632 bytes into 4383340 at level -1
 done]
 
-* Makefile messages
-chgrp tmp /home/shalaev/quicklisp/local-projects/signal-handler/example.bin
-cp -a /home/shalaev/quicklisp/local-projects/signal-handler/example.bin generated/example.bin
+* launching the DEMO
+will launch the DEMO now
+*****
 rm -r /tmp/sbcl.lock/acceptor
 rm: cannot remove '/tmp/sbcl.lock/acceptor': No such file or directory
-make: [Makefile:11: tell] Error 1 (ignored)
-generated/example.bin & echo "Makefile--> PID=$!"
-Makefile--> PID=30566
+make: [Makefile:18: demo] Error 1 (ignored)
+$HOME/quicklisp/local-projects/signal-handler/example.bin & echo "Makefile--> PID=$!"
+Makefile--> PID=12771
 generated/tell
-
-* Messages from the code
-lisp code says that its PID=30566
-kill -s USR1 30566
-
+lisp code says that its PID=12771
+kill -s USR1 12771
 Now let us ensure that our message has been delivered.
 1th check: waiting for the LISP code that must delete /tmp/sbcl.lock/acceptor/by
-
 After 1/10 seconds, the message was delivered.
 all done, ready for more messages
+====
+git commit -am 'added "change-log.org" + modified "Makefile" + started using "shalaev" package'
+git push origin master
+rm generated/headers/make: unlink: generated/headers/: Is a directory
+ generated/from/make: unlink: generated/from/: Is a directory
 
-11/17 10:34:24.004 DEBUG SHE created /tmp/sbcl.lock/pid
-11/17 10:34:24.004 DEBUG SH Started, now waiting for the kill signals.
-11/17 10:34:24.004 DEBUG SH registering the hook "acceptor"
-11/17 10:34:24.004 DEBUG SH already started, won't start for the second time
-11/17 10:34:24.004 DEBUG SHE started simple-handler service
-11/17 10:34:24.004 INFO SHE will accept messages for the next 3 seconds
-11/17 10:34:24.076 INFO SH found the directory acceptor, will now read the file
-11/17 10:34:24.076 INFO SHE killer told me: "Message: the time now is Вт ноя 17 10:34:24 EST 2020"
-11/17 10:34:24.076 DEBUG SH received the message "Message: the time now is Вт ноя 17 10:34:24 EST 2020", erasing the file /tmp/sbcl.lock/acceptor/by
-11/17 10:34:27.004 INFO SHE time is up, hook is removed, messages are ignored from now
-
-*Note that log messages from the LISP code were delayed with respect to the echoed text from the shell.*
+11/28 18:10:37.000 DEBUG SHE created /tmp/sbcl.lock/pid
+11/28 18:10:37.000 DEBUG SH Started, now waiting for the kill signals.
+11/28 18:10:37.000 DEBUG SH registering the hook "acceptor"
+11/28 18:10:37.000 DEBUG SH already started, won't start for the second time
+11/28 18:10:37.000 DEBUG SHE started simple-handler service
+11/28 18:10:37.000 INFO SHE will accept messages for the next 3 seconds
+11/28 18:10:37.080 INFO SH found the directory acceptor, will now read the file
+11/28 18:10:37.080 INFO SHE my killer told me: "Let me tell you something: the time now is Сб ноя 28 18:10:37 EST 2020"
+11/28 18:10:37.080 DEBUG SH received the message "Let me tell you something: the time now is Сб ноя 28 18:10:37 EST 2020", erasing the file /tmp/sbcl.lock/acceptor/by
+11/28 18:10:40.000 INFO SHE time is up, hook is removed, messages are ignored from now
