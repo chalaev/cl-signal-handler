@@ -1,41 +1,50 @@
 
 # Table of Contents
 
-1.  [The scope](#org32f6edd)
-2.  [Prerequisites](#org638fc4b)
-3.  [Quick start – usage example](#orgd2c3ec5)
-4.  [Files](#orge0c45da)
-5.  [Motivation](#org9bef6e1)
-6.  [License](#orga99efc6)
-7.  [Support](#org14b198d)
+1.  [The scope](#org5639878)
+2.  [Prerequisites](#orgb4af67f)
+3.  [Quick start – usage example](#org34aed28)
+4.  [Files](#orgb38177a)
+5.  [Motivation](#org7b816fe)
+6.  [License](#orge596808)
+7.  [Support](#org2165c99)
 
 Simple kill-signall message acceptor for [sbcl](http://www.sbcl.org/).
 
 
-<a id="org32f6edd"></a>
+<a id="org5639878"></a>
 
 # The scope
 
 A simple and reliable way to send messages to LISP services.
 
 
-<a id="org638fc4b"></a>
+<a id="orgb4af67f"></a>
 
 # Prerequisites
 
-Although this code is quite mature, [simple-log](https://github.com/chalaev/cl-simple-logger) package is needed for debugging, so `quicklisp` should be able to find its files.
+This code uses packages:
 
-For example, I have `quicklisp` installed in `~/quicklisp/` so [simple-log](https://github.com/chalaev/cl-simple-logger) is available in `~/quicklisp/local-projects/simple-log/`.
+1.  [simple-log](https://github.com/chalaev/cl-simple-logger)  – needed for debugging, and
+2.  [lisp-goodies](https://github.com/chalaev/lisp-goodies) (shalaev),
+
+so lisp should be able to `require` them.
+
+For example, if `quicklisp` resides in `~/quicklisp/`,
+these two packages can be installed as follows:
+
+tar xjfv [shalaev.tbz](https://github.com/chalaev/lisp-goodies/blob/master/generated/shalaev.tbz) &#x2013;directory=$HOME/quicklisp/local-projects/   
+tar xjfv [simple-log.tbz](https://github.com/chalaev/cl-simple-logger/blob/master/generated/simple-log.tbz) &#x2013;directory=$HOME/quicklisp/local-projects/
 
 
-<a id="orgd2c3ec5"></a>
+<a id="org34aed28"></a>
 
 # Quick start – usage example
 
 `make` compiles the binary `example.bin` and launches it in background.
 It is a server that will "listen" for `kill` signals for a few seconds.
 
-LISP services may register one or more `hooks` using `(sh:register sdir func)`,
+LISP services may register one or more `hooks` using `(sh:register dir func)`,
 where `dir` is the name of the lock (sub)directory.
 
 The shell script [tell](generated/tell) is a client that
@@ -54,18 +63,17 @@ In this way the sender is notified that the message has been received,
 and now the sender must delete the sub-directory `sdir` in order to allow others to send messages to LISP code.
 
 
-<a id="orge0c45da"></a>
+<a id="orgb38177a"></a>
 
 # Files
 
-1.  [signal-handler.org](signal-handler.md) is the main file containing most of the code with comments.
-2.  [Makefile](Makefile) compiles [generated/example.lisp](generated/example.lisp) into `generated/example.bin` and launches it.
-3.  Other files in [generated/](generated) can be produced by `emacs` from [signal-handler.org](signal-handler.md) using either `make` or `M-x org-babel-tangle`.
-4.  [make.org](make.md) shows the log messages displayed by `make` command.
-5.  [helpers/\*](helpers/) assist compilation.
+1.  [signal-handler.org](signal-handler.md) is the main file containing most of the code with comments,
+2.  [Makefile](Makefile) compiles [generated/example.lisp](generated/example.lisp) into `generated/example.bin` and launches it,
+3.  [make.org](make.md) contains log messages displayed by sucessfull `make` command, and
+4.  [helpers/\*](helpers/) assist compilation.
 
 
-<a id="org9bef6e1"></a>
+<a id="org7b816fe"></a>
 
 # Motivation
 
@@ -73,14 +81,14 @@ and now the sender must delete the sub-directory `sdir` in order to allow others
 which is much more than I need to satisfy my modest needs: I just need simple text message exchange between `sbcl` and other programs (including shell scripts).
 
 
-<a id="orga99efc6"></a>
+<a id="orge596808"></a>
 
 # License
 
 This code is released under [MIT license](https://mit-license.org/).
 
 
-<a id="org14b198d"></a>
+<a id="org2165c99"></a>
 
 # Support
 

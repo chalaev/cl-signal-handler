@@ -4,15 +4,22 @@ Simple kill-signall message acceptor for [[http://www.sbcl.org/][sbcl]].
 A simple and reliable way to send messages to LISP services.
 
 * Prerequisites
-Although this code is quite mature, [[https://github.com/chalaev/cl-simple-logger][simple-log]] package is needed for debugging, so =quicklisp= should be able to find its files.
+This code uses packages:
+1. [[https://github.com/chalaev/cl-simple-logger][simple-log]]  – needed for debugging, and
+2. [[https://github.com/chalaev/lisp-goodies][lisp-goodies]] (shalaev),
+so lisp should be able to =require= them.
 
-For example, I have =quicklisp= installed in =~/quicklisp/= so [[https://github.com/chalaev/cl-simple-logger][simple-log]] is available in =~/quicklisp/local-projects/simple-log/=.
+For example, if =quicklisp= resides in =~/quicklisp/=,
+these two packages can be installed as follows:
+
+tar xjfv [[https://github.com/chalaev/lisp-goodies/blob/master/generated/shalaev.tbz][shalaev.tbz]] --directory=$HOME/quicklisp/local-projects/ \\
+tar xjfv [[https://github.com/chalaev/cl-simple-logger/blob/master/generated/simple-log.tbz][simple-log.tbz]] --directory=$HOME/quicklisp/local-projects/
 
 * Quick start – usage example
 =make= compiles the binary =example.bin= and launches it in background.
 It is a server that will "listen" for =kill= signals for a few seconds.
 
-LISP services may register one or more ~hooks~ using =(sh:register sdir func)=,
+LISP services may register one or more ~hooks~ using =(sh:register dir func)=,
 where =dir= is the name of the lock (sub)directory.
 
 The shell script [[file:generated/tell][tell]] is a client that
@@ -30,11 +37,10 @@ In this way the sender is notified that the message has been received,
 and now the sender must delete the sub-directory =sdir= in order to allow others to send messages to LISP code.
 
 * Files
-1. [[file:signal-handler.org][signal-handler.org]] is the main file containing most of the code with comments.
-2. [[file:Makefile][Makefile]] compiles [[file:generated/example.lisp][generated/example.lisp]] into ~generated/example.bin~ and launches it.
-3. Other files in [[file:generated][generated/]] can be produced by ~emacs~ from [[file:signal-handler.org][signal-handler.org]] using either =make= or =M-x org-babel-tangle=.
-4. [[file:make.org][make.org]] shows the log messages displayed by =make= command.
-5. [[file:helpers/][helpers/*]] assist compilation.
+1. [[file:signal-handler.org][signal-handler.org]] is the main file containing most of the code with comments,
+2. [[file:Makefile][Makefile]] compiles [[file:generated/example.lisp][generated/example.lisp]] into ~generated/example.bin~ and launches it,
+3. [[file:make.org][make.org]] contains log messages displayed by sucessfull =make= command, and
+4. [[file:helpers/][helpers/*]] assist compilation.
 
 * Motivation
 [[https://github.com/death/dbus][dbus]] might have many fancy features, but on my computer =(ql:quickload :dbus)= downloads 55 other packages to satisfy [[https://github.com/death/dbus][dbus]]'es requirements,
