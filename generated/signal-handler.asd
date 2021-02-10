@@ -9,7 +9,7 @@
  :components ((:file "signal-handler")))
 
 (defsystem "signal-handler/example"
-:depends-on (:signal-handler)
+:depends-on (:signal-handler :simple-log :shalaev)
 
 :build-operation  "program-op"
 :build-pathname "example.bin"

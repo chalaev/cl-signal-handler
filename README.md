@@ -1,43 +1,43 @@
 
 # Table of Contents
 
-1.  [The scope](#org5639878)
-2.  [Prerequisites](#orgb4af67f)
-3.  [Quick start – usage example](#org34aed28)
-4.  [Files](#orgb38177a)
-5.  [Motivation](#org7b816fe)
-6.  [License](#orge596808)
-7.  [Support](#org2165c99)
+1.  [Description](#org1281d43)
+2.  [Prerequisites](#org85dde69)
+3.  [Quick start – usage example](#org0cfa78a)
+4.  [Files](#orgd2f8b75)
+5.  [Motivation](#orgd86d960)
+6.  [License](#orgda40b44)
 
 Simple kill-signall message acceptor for [sbcl](http://www.sbcl.org/).
 
 
-<a id="org5639878"></a>
+<a id="org1281d43"></a>
 
-# The scope
+# Description
 
 A simple and reliable way to send messages to LISP services.
 
 
-<a id="orgb4af67f"></a>
+<a id="org85dde69"></a>
 
 # Prerequisites
 
-This code uses packages:
+This code needs:
 
-1.  [simple-log](https://github.com/chalaev/cl-simple-logger)  – needed for debugging, and
-2.  [lisp-goodies](https://github.com/chalaev/lisp-goodies) (shalaev),
+1.  `lfp.h` (provided by `libfixposix-dev` package in [Debian](https://www.debian.org/)),
+2.  [simple-log](https://github.com/chalaev/cl-simple-logger)  – needed for debugging/logging, and
+3.  [lisp-goodies](https://github.com/chalaev/lisp-goodies) (package named `:shalaev`),
 
-so lisp should be able to `require` them.
+so LISP should be able to `require` these two packages.
 
 For example, if `quicklisp` resides in `~/quicklisp/`,
 these two packages can be installed as follows:
 
-tar xjfv [shalaev.tbz](https://github.com/chalaev/lisp-goodies/blob/master/generated/shalaev.tbz) &#x2013;directory=$HOME/quicklisp/local-projects/   
-tar xjfv [simple-log.tbz](https://github.com/chalaev/cl-simple-logger/blob/master/generated/simple-log.tbz) &#x2013;directory=$HOME/quicklisp/local-projects/
+tar xjfv [cl-shalaev.tbz](https://github.com/chalaev/lisp-goodies/raw/master/packaged/cl-shalaev.tbz) &#x2013;directory=$HOME/quicklisp/local-projects/   
+tar xjfv [simple-log.tbz](https://github.com/chalaev/cl-simple-logger/raw/master/packaged/simple-log.tbz) &#x2013;directory=$HOME/quicklisp/local-projects/
 
 
-<a id="org34aed28"></a>
+<a id="org0cfa78a"></a>
 
 # Quick start – usage example
 
@@ -63,17 +63,18 @@ In this way the sender is notified that the message has been received,
 and now the sender must delete the sub-directory `sdir` in order to allow others to send messages to LISP code.
 
 
-<a id="orgb38177a"></a>
+<a id="orgd2f8b75"></a>
 
 # Files
 
-1.  [signal-handler.org](signal-handler.md) is the main file containing most of the code with comments,
+1.  [signal-handler.org](signal-handler.org) is the main file containing most of the code with comments,
 2.  [Makefile](Makefile) compiles [generated/example.lisp](generated/example.lisp) into `generated/example.bin` and launches it,
-3.  [make.org](make.md) contains log messages displayed by sucessfull `make` command, and
-4.  [helpers/\*](helpers/) assist compilation.
+3.  [make.org](make.org) contains log messages displayed by sucessfull `make` command,
+4.  [helpers/\*](helpers/) assist compilation, and
+5.  [packaged/signal-handler.tbz](packaged/signal-handler.tbz) is the package archive.
 
 
-<a id="org7b816fe"></a>
+<a id="orgd86d960"></a>
 
 # Motivation
 
@@ -81,19 +82,9 @@ and now the sender must delete the sub-directory `sdir` in order to allow others
 which is much more than I need to satisfy my modest needs: I just need simple text message exchange between `sbcl` and other programs (including shell scripts).
 
 
-<a id="orge596808"></a>
+<a id="orgda40b44"></a>
 
 # License
 
 This code is released under [MIT license](https://mit-license.org/).
-
-
-<a id="org2165c99"></a>
-
-# Support
-
-You can support this project by sending
-
-1.  comments/questions to [oleg@chalaev.com](mailto:oleg@chalaev.com) and
-2.  donations via [liberapay](https://liberapay.com/shalaev/donate) or [paypal](https://www.paypal.com/paypalme/chalaev).
 

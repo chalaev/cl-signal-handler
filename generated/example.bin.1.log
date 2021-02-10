@@ -1,0 +1,51 @@
+This is SBCL 2.1.0, an implementation of ANSI Common Lisp.
+More information about SBCL is available at <http://www.sbcl.org/>.
+
+SBCL is free software, provided as is, with absolutely no warranty.
+It is mostly in the public domain; some portions are provided under
+BSD-style licenses.  See the CREDITS and COPYING files in the
+distribution for more information.
+; compiling file "/home/shalaev/quicklisp/local-projects/signal-handler/signal-handler.lisp" (written 10 FEB 2021 01:59:58 PM):
+; processing (DEFPACKAGE :SIGNAL-HANDLER ...)
+; processing (IN-PACKAGE :SIGNAL-HANDLER)
+; processing (DEFVAR *STARTED* ...)
+; processing (DEFVAR HOOKS ...)
+; processing (DEFVAR *CLIENTS* ...)
+; processing (DEFUN LOG ...)
+; processing (CFFI:DEFCSTRUCT SATYPE ...)
+; processing (DEFVAR LOCK-DIR ...)
+; processing (CFFI:DEFCALLBACK SIGHANDLER ...)
+; processing (DEFUN PID-FN ...)
+; processing (DEFUN START ...)
+; processing (DEFUN STOP ...)
+; processing (DEFUN REGISTER ...)
+; processing (DEFUN FORGET ...)
+; processing (DEFUN FORGET-ALL ...)
+
+; wrote /home/shalaev/.cache/common-lisp/sbcl-2.1.0-linux-x64/home/shalaev/quicklisp/local-projects/signal-handler/signal-handler-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.036
+; compiling file "/home/shalaev/quicklisp/local-projects/signal-handler/example.lisp" (written 10 FEB 2021 01:59:58 PM):
+; processing (DEFPACKAGE :SIGNAL-HANDLER/EXAMPLE ...)
+; processing (IN-PACKAGE :SIGNAL-HANDLER/EXAMPLE)
+; processing (DEFUN LOGE ...)
+; processing (DEFUN WACHTER ...)
+; processing (DEFVAR TIME-INTERVAL ...)
+; processing (DEFUN MAIN ...)
+
+; wrote /home/shalaev/.cache/common-lisp/sbcl-2.1.0-linux-x64/home/shalaev/quicklisp/local-projects/signal-handler/example-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.004
+[undoing binding stack and other enclosing state... done]
+[performing final GC... done]
+[defragmenting immobile space... (fin,inst,fdefn,code,sym)=1493+1269+20632+21636+26246... done]
+[saving current Lisp image into /home/shalaev/quicklisp/local-projects/signal-handler/example.bin:
+writing 0 bytes from the read-only space at 0x50000000
+compressed 0 bytes into 8 at level -1
+writing 816 bytes from the static space at 0x50100000
+compressed 32768 bytes into 345 at level -1
+writing 35848192 bytes from the dynamic space at 0x1000000000
+compressed 35848192 bytes into 8008144 at level -1
+writing 2166784 bytes from the immobile space at 0x50200000
+compressed 2195456 bytes into 613961 at level -1
+writing 13676544 bytes from the immobile space at 0x52000000
+compressed 13697024 bytes into 4332915 at level -1
+done]

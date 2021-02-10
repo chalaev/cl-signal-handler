@@ -1,5 +1,11 @@
 Change log for [[https://github.com/chalaev/cl-signal-handler][cl-signal-handler]].
 
+* Updates for easier usage
+For example, [[https://github.com/chalaev/cl-signal-handler][cl-signal-handler]] can be used to control a =Hunchentoot= web server.
+** 02/10
+1. renamed package =:server-log= → =:simple-log=
+2. improved usability, see [[file:generated/example.lisp][example.lisp]]
+
 * Almost stable
 This code was written 2+ years before it was packaged and published, so I do not expect it to be changed a lot.
 

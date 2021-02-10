@@ -4,16 +4,8 @@
 #+LaTeX_HEADER: \usepackage[english,russian]{babel}
 #+LATEX_HEADER: \usepackage[letterpaper,hmargin={1.5cm,1.5cm},vmargin={1.3cm,2cm},nohead,nofoot]{geometry}
 
-Maybe I should use my old [[https://github.com/chalaev/cl-libconfig][cl-libconfig]] instead of all these =defvar=:
 #+BEGIN_SRC lisp :tangle generated/signal-handler.lisp
 (defvar *started* nil)
-(defvar lock-dir (ensure-directories-exist
-#+END_SRC
-There might be several lisp services (e.g., on a web server) accepting kill signals.
-Each of them will monitor its individual directory created inside =lock-dir=
-#+BEGIN_SRC lisp :tangle generated/signal-handler.lisp
-(uiop:ensure-directory-pathname (merge-pathnames #p"sbcl.lock" (uiop:temporary-directory))))
-"common directory for all lockers")
 (defvar hooks nil)
 (defvar *clients* nil)
 #+END_SRC
@@ -21,9 +13,8 @@ Each of them will monitor its individual directory created inside =lock-dir=
 
 In order to distinguish log messages from this code we define special logger:
 #+BEGIN_SRC lisp :tangle generated/signal-handler.lisp
-(defun log-SH (type &rest message)
-  (apply #'sl:log
-    (cons type (cons (concat "SH " (car message)) (cdr message)))))
+(defun log(type format-str &rest params)
+  (apply #'sl:log (cons type (cons (concat "SH " format-str) params))))
 #+END_SRC
 
 * OS interface
@@ -52,59 +43,70 @@ if any of the lock-directories were actually created.
 
 =cffi:defcallback= immediately compiles its argument (the specified function):
 #+BEGIN_SRC lisp :tangle generated/signal-handler.lisp
+(defvar lock-dir nil)
 (cffi:defcallback sighandler :void ((signum :int) (info :pointer) (ptr :pointer))
-  (declare (integer signum))
+  (declare(integer signum))
+;;(ifn lock-dir (log sl:error "lock-dir is undefined")
   (when (= 10 signum)
-(needs ((active-hooks (remove-if-not #'(lambda(h) (directory (merge-paths lock-dir (car h)))) hooks) (log-SH sl:debug "hook not found")))
-  (dolist (hook active-hooks)
-    (let ((hf (cdr hook)) (FN (merge-paths lock-dir (car hook) "by")))
+    (needs ((active-hooks (remove-if-not #'(lambda(h) (directory (merge-paths lock-dir (car h)))) hooks) (log sl:debug "hook not found")))
+	   (dolist (hook active-hooks)
+	     (let ((hf (cdr hook)) (FN (merge-paths lock-dir (car hook) "by")))
 #+END_SRC
 ← the file name is always the same: "by", but its (lock) directory name is unique for each service.
 #+BEGIN_SRC lisp :tangle generated/signal-handler.lisp
-(log-SH sl:info "found the directory ~a, will now read the file" (car hook))
-(with-open-file (s FN :if-does-not-exist :create)
-  (ifn-let ((mes (read-line s nil))) (log-SH sl:warning "could not find the file ~a" FN)
+(log sl:debug "found the directory ~a, will now read the file" (car hook))
+(with-open-file(s FN :if-does-not-exist :create)
+  (ifn-let((mes(read-line s nil))) (log sl:error "could not find the file ~a" FN)
     (funcall hf mes)
-    (log-SH sl:debug "received the message ~s, erasing the file ~a" mes FN)))
+    (log sl:debug "received the message ~s, erasing the file ~a" mes FN)))
 (delete-file FN))))))
 #+END_SRC
 By erasing the file we let the message sender (directory locker) know that the message was received.
 This was the end of the kill-acceptor code.
 
-Now that we have defined the callback by =cffi:defcallback= we can use it (not vice versa – this order is important!)
+Now once we have defined the callback by =cffi:defcallback=, we can use it (not vice versa – this order is important!)
 #+BEGIN_SRC lisp :tangle generated/signal-handler.lisp
-(defun start()
-(iff *started* (log-SH sl:debug "already started, won't start for the second time")
+(defun pid-FN()
+(ifn lock-dir (log sl:error "pid-FN: undefined lock-dir")
+(merge-paths lock-dir "pid")))
+(defun start(&optional (root-directory (uiop:temporary-directory)))
+(iff *started* (log sl:debug "already started, won't start for the second time")
+(setf lock-dir (ensure-directories-exist (uiop:ensure-directory-pathname root-directory)))
 (cffi:with-foreign-object (act '(:struct saType))
   (setf (cffi:foreign-slot-value act '(:struct saType) 'handler) (cffi:callback sighandler))
   (setf (cffi:foreign-slot-value act '(:struct saType) 'mask) iolib.syscalls:sa-siginfo)
   (iolib.syscalls:sigaction iolib.syscalls:sigusr1 act (cffi-sys:null-pointer)))
-  (log-SH sl:debug "Started, now waiting for the kill signals.")
-(setf *started* t)))
 #+END_SRC
-I noticed that the log messages were temporarily blocked with this code, and suspect that
+Let the killers know whom to kill by creating ~pid~ file:
+#+BEGIN_SRC lisp :tangle generated/signal-handler.lisp
+(echo-to-file (pid-FN) (format nil "~d ok" (sb-posix:getpid))))
+(log sl:info ":signal-handler is now ready to treat kill signals.")
+(setf *started* t))
+(defun stop()
+(delete-file (pid-FN))
+(log sl:info "erased ~a" (pid-FN)))
+#+END_SRC
+I noticed that log messages were temporarily blocked with this code, and suspect that
 this may happen due to the wrong (too strict) value of =iolib.syscalls:sa-siginfo=.
 
 * Handlers: register and forget
 #+BEGIN_SRC lisp :tangle generated/signal-handler.lisp
 (defun register (name hook-function)
 #+END_SRC
-← =hook-function= (or handler) must return T; otherwise further signals are blocked.
+← =hook-function= (or handler) must return =T=; otherwise further signals are blocked.
 
 It will be evaluated when someone
 1. creates a lock directory =name=, and then
 2. sends the kill signal:
 #+BEGIN_SRC lisp :tangle generated/signal-handler.lisp
 (declare (string name))
-(unless *started* (start))
-(log-SH sl:debug "registering the hook ~s" name)
-(if (member name (mapcar #'car hooks))
- (log-SH sl:error "I have already registered the hook for ~s, please change the name or forget" name)
+(if(member name (mapcar #'car hooks))
+ (log sl:error "hook for ~s is already registered" name)
  (push (cons name hook-function) hooks)))
 #+END_SRC
-
+Forgetting hooks:
 #+BEGIN_SRC lisp :tangle generated/signal-handler.lisp
-(defun forget (name)
+(defun forget(name)
   (drop-if name hooks :key #'car :test #'string=))
 (defun forget-all()
   (setf hooks nil))
@@ -112,7 +114,7 @@ It will be evaluated when someone
 
 * Example
 #+BEGIN_SRC lisp :tangle generated/example.lisp
-(defun log-SHE (type &rest message)
+(defun logE (type &rest message)
     (apply #'sl:log
       (cons type (cons (concat "SHE " (car message)) (cdr message)))))
 #+END_SRC
@@ -121,7 +123,7 @@ Every time the kill-signal is sent, the following (toy) function will be called:
 #+BEGIN_SRC lisp :tangle generated/example.lisp
 (defun wachter(message)
   "An example kill-signal handler. Its argument is a message from the killer."
-  (log-SHE sl:info "my killer told me: ~s" message) T)
+  (logE sl:info "my killer told me: ~s" message) T)
 #+END_SRC
 ←  handler must return T.
 
@@ -129,31 +131,28 @@ Note that the compilation fails if we move any code outside of the =main= functi
 #+BEGIN_SRC lisp :tangle generated/example.lisp
 (defvar time-interval 3)
 (defun main()
+(sh:start (merge-pathnames (make-pathname :directory "tmp")  "sbcl.lock"))
 #+END_SRC
-Let the killers know whom to kill by creating ~pid~ file:
-#+BEGIN_SRC lisp :tangle generated/example.lisp
-(let ((pid-FN (merge-paths SH:lock-dir "pid")))
-(echo-to-file pid-FN (format nil "~d ok" (sb-posix:getpid)))
-(log-SHE sl:debug "created ~a" pid-FN)
-#+END_SRC
+← won't work without this command.
 
 #+BEGIN_SRC lisp :tangle generated/example.lisp
 (sh:register "acceptor" #'wachter)
-(sh:start)
-(log-SHE sl:debug "started simple-handler service")
+(logE sl:debug "started simple-handler service")
 #+END_SRC
 
 #+BEGIN_SRC lisp :tangle generated/example.lisp
 (setf sl:out-streams (list *standard-output*))
-(log-SHE sl:info "will accept messages for the next ~d seconds" time-interval)
+(logE sl:info "will accept messages for the next ~d seconds" time-interval)
 (sleep time-interval)
-(log-SHE sl:info "time is up, hook is removed, messages are ignored from now")
+(logE sl:info "time is up, hook is removed, messages are ignored from now")
 (sleep 1)
-(delete-file pid-FN)
-(log-SHE sl:info "erased ~a" pid-FN)))
+(sh:stop))
 #+END_SRC
+← the last command is essential – it cleans up.
 
 * Usage
+For this section we need compiled binary =example.bin= produced by =make=, see [[file:Makefile][Makefile]].
+** Terminal (shell)
 First of all let us ensure that =example.bin= started and created the file with its PID:
 #+BEGIN_SRC shell :tangle generated/tell :shebang "#!/bin/bash"
 dir=/tmp/sbcl.lock
@@ -218,4 +217,16 @@ Or we could just finish the conversation by removing the lock (directory):
 #+BEGIN_SRC shell :tangle generated/tell
 echo "all done, ready for more messages"
 fi
+#+END_SRC
+** emacs
+*To be written*
+
+For killing use
+#+BEGIN_SRC elisp
+(signal-process PID 'sigusr1)
+#+END_SRC
+
+BTW, ~DBus~ is available in elisp:
+#+BEGIN_SRC elisp
+(featurep 'dbusbind)
 #+END_SRC

@@ -17,8 +17,9 @@
 ;;(declaim (optimize (speed 3) (safety 0)))
 (defpackage :signal-handler
     (:nicknames "SH") ;(:nicknames :SH)
+    (:shadow cl:log)
     (:use :cl :shalaev/macros :shalaev/files)
-    (:export :register :forget :forget-all :lock-dir :start))
+    (:export :register :forget :forget-all :lock-dir :start :stop))
 (in-package :signal-handler)
 #+END_SRC
 
@@ -26,7 +27,7 @@
 Declaring example package in the same (main) =.asd= file:
 #+BEGIN_SRC lisp :tangle generated/signal-handler.asd
 (defsystem "signal-handler/example"
-:depends-on (:signal-handler)
+:depends-on (:signal-handler :simple-log :shalaev)
 #+END_SRC
 
 3 next lines serve to assist with building binary image:
@@ -50,6 +51,7 @@ where ~:build-pathname~ is relative to the package placement
 #+BEGIN_SRC lisp :tangle generated/headers/example.lisp :shebang ";; generated from .org"
 ;;(declaim (optimize (speed 3) (safety 0)))
 (defpackage :signal-handler/example
+    (:shadow cl:log)
     (:export :main)
     (:use :cl :shalaev/macros :shalaev/files))
 (in-package :signal-handler/example)

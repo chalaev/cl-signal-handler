@@ -1,19 +1,20 @@
 Simple kill-signall message acceptor for [[http://www.sbcl.org/][sbcl]].
 
-* The scope
+* Description
 A simple and reliable way to send messages to LISP services.
 
 * Prerequisites
-This code uses packages:
-1. [[https://github.com/chalaev/cl-simple-logger][simple-log]]  – needed for debugging, and
-2. [[https://github.com/chalaev/lisp-goodies][lisp-goodies]] (shalaev),
-so lisp should be able to =require= them.
+This code needs:
+1. =lfp.h= (provided by =libfixposix-dev= package in [[https://www.debian.org/][Debian]]),
+2. [[https://github.com/chalaev/cl-simple-logger][simple-log]]  – needed for debugging/logging, and
+3. [[https://github.com/chalaev/lisp-goodies][lisp-goodies]] (package named =:shalaev=),
+so LISP should be able to =require= these two packages.
 
 For example, if =quicklisp= resides in =~/quicklisp/=,
 these two packages can be installed as follows:
 
-tar xjfv [[https://github.com/chalaev/lisp-goodies/blob/master/generated/shalaev.tbz][shalaev.tbz]] --directory=$HOME/quicklisp/local-projects/ \\
-tar xjfv [[https://github.com/chalaev/cl-simple-logger/blob/master/generated/simple-log.tbz][simple-log.tbz]] --directory=$HOME/quicklisp/local-projects/
+tar xjfv [[https://github.com/chalaev/lisp-goodies/raw/master/packaged/cl-shalaev.tbz][cl-shalaev.tbz]] --directory=$HOME/quicklisp/local-projects/ \\
+tar xjfv [[https://github.com/chalaev/cl-simple-logger/raw/master/packaged/simple-log.tbz][simple-log.tbz]] --directory=$HOME/quicklisp/local-projects/
 
 * Quick start – usage example
 =make= compiles the binary =example.bin= and launches it in background.
@@ -39,8 +40,9 @@ and now the sender must delete the sub-directory =sdir= in order to allow others
 * Files
 1. [[file:signal-handler.org][signal-handler.org]] is the main file containing most of the code with comments,
 2. [[file:Makefile][Makefile]] compiles [[file:generated/example.lisp][generated/example.lisp]] into ~generated/example.bin~ and launches it,
-3. [[file:make.org][make.org]] contains log messages displayed by sucessfull =make= command, and
-4. [[file:helpers/][helpers/*]] assist compilation.
+3. [[file:make.org][make.org]] contains log messages displayed by sucessfull =make= command,
+4. [[file:helpers/][helpers/*]] assist compilation, and
+5. [[file:packaged/signal-handler.tbz][packaged/signal-handler.tbz]] is the package archive.
 
 * Motivation
 [[https://github.com/death/dbus][dbus]] might have many fancy features, but on my computer =(ql:quickload :dbus)= downloads 55 other packages to satisfy [[https://github.com/death/dbus][dbus]]'es requirements,
@@ -49,7 +51,3 @@ which is much more than I need to satisfy my modest needs: I just need simple te
 * License
 This code is released under [[https://mit-license.org/][MIT license]].
 
-* Support
-You can support this project by sending
-1. comments/questions to [[mailto:oleg@chalaev.com][oleg@chalaev.com]] and
-2. donations via [[https://liberapay.com/shalaev/donate][liberapay]] or [[https://www.paypal.com/paypalme/chalaev][paypal]].

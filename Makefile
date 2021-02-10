@@ -11,22 +11,23 @@ ORGs = $(addsuffix .org, $(OFNs))
 
 #SH=/bin/sh
 
-all: quicklisp README.md generated/signal-handler.tbz $(addprefix generated/from/, $(ORGs)) $(quicklispDir)/example.bin demo git
+all: quicklisp README.md packaged/signal-handler.tbz $(addprefix generated/from/, $(ORGs)) $(quicklispDir)/example.bin demo
 quicklisp: $(quicklispDir)/ $(addprefix $(quicklispDir)/, $(package)) $(addprefix generated/from/, $(ORGs))
 
 demo: $(quicklispDir)/example.bin generated/from/signal-handler.org
 	-rm -r /tmp/sbcl.lock/acceptor
-	$(quicklispDir)/example.bin & echo "Makefile--> PID=$$!"
+	@$(quicklispDir)/example.bin & echo "Makefile--> PID=$$!"
+	@echo "\n*** will launch the DEMO now ***\n"
 	generated/tell
 
 $(quicklispDir)/example.bin: quicklisp generated/description.org
 	@echo "*** COMPILING THE BINARY ***"
-	$(SBCL) --quit --eval "(asdf:make :signal-handler/example)"
-	@echo "\n*** COMPILED THE BINARY, ***\nwill launch the DEMO now\n*****"
+	$(SBCL) --quit --eval "(asdf:make :signal-handler/example)" 2> generated/example.bin.2.log > generated/example.bin.1.log
+	@echo "\n*** COMPILED THE BINARY ***\n"
 	-@chgrp tmp $@
 
-generated/signal-handler.tbz: quicklisp
-	tar jcfv $@ --directory=$(quicklispDir)/..  signal-handler
+packaged/signal-handler.tbz: quicklisp packaged/
+	tar jcfv $@ --directory=$(quicklispDir)/..  --exclude=example.bin signal-handler/
 	-@chgrp tmp $@
 
 generated/description.org: description.org
@@ -51,23 +52,19 @@ generated/from/%.org: %.org generated/from/ generated/headers/
 
 README.md: README.org
 	emacsclient -e '(progn (find-file "README.org") (org-md-export-to-markdown))'
+	@sed -i "s/\.md)/.org)/g"  $@
 	-@chgrp tmp $@
 	-@chmod a-x $@
 
 clean:
+	echo "asdf:clear-system forces recompilation of a previously loaded system"
 	-$(SBCL) --quit --eval '(progn (asdf:clear-system :signal-handler) (asdf:clear-system :signal-handler/example))'
 	-rm -r $(quicklispDir) generated
 
-.PHONY: clean quicklisp all git demo
+.PHONY: clean quicklisp all demo
 
 %/:
 	[ -d $@ ] || mkdir -p $@
-
-git: generated/signal-handler.tbz next-commit.txt README.md
-	@echo "===="
-	-@echo "git commit -am '"`head -n1 next-commit.txt`"'"
-	@echo "git push origin master"
-
 
 version.org: change-log.org helpers/derive-version.el
 	emacsclient -e '(progn (load "$(CURDIR)/helpers/derive-version.el") (format-version "$<"))' | sed 's/"//g' > $@
