@@ -31,7 +31,7 @@
 (ifn lock-dir (log sl:error "pid-FN: undefined lock-dir")
 (merge-paths lock-dir "pid")))
 (defun start(&optional (root-directory (uiop:temporary-directory)))
-(iff *started* (log sl:debug "already started, won't start for the second time")
+(iff *started* (log sl:debug "sigkill handler already started")
 (setf lock-dir (ensure-directories-exist (uiop:ensure-directory-pathname root-directory)))
 (cffi:with-foreign-object (act '(:struct saType))
   (setf (cffi:foreign-slot-value act '(:struct saType) 'handler) (cffi:callback sighandler))
@@ -43,7 +43,8 @@
 (setf *started* t))
 (defun stop()
 (delete-file (pid-FN))
-(log sl:info "erased ~a" (pid-FN)))
+(log sl:info "erased ~a" (pid-FN))
+(setf *started* nil))
 
 (defun register (name hook-function)
 

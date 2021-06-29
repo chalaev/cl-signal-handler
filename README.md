@@ -1,24 +1,24 @@
 
 # Table of Contents
 
-1.  [Description](#org1281d43)
-2.  [Prerequisites](#org85dde69)
-3.  [Quick start – usage example](#org0cfa78a)
-4.  [Files](#orgd2f8b75)
-5.  [Motivation](#orgd86d960)
-6.  [License](#orgda40b44)
+1.  [Description](#orgaa471e9)
+2.  [Prerequisites](#org260eb16)
+3.  [Quick start – usage example](#orgc011cee)
+4.  [Files](#orge42b9e0)
+5.  [Motivation](#org909ce94)
+6.  [License](#org266fca1)
 
 Simple kill-signall message acceptor for [sbcl](http://www.sbcl.org/).
 
 
-<a id="org1281d43"></a>
+<a id="orgaa471e9"></a>
 
 # Description
 
-A simple and reliable way to send messages to LISP services.
+A simple way to send messages to LISP services.
 
 
-<a id="org85dde69"></a>
+<a id="org260eb16"></a>
 
 # Prerequisites
 
@@ -26,7 +26,7 @@ This code needs:
 
 1.  `lfp.h` (provided by `libfixposix-dev` package in [Debian](https://www.debian.org/)),
 2.  [simple-log](https://github.com/chalaev/cl-simple-logger)  – needed for debugging/logging, and
-3.  [lisp-goodies](https://github.com/chalaev/lisp-goodies) (package named `:shalaev`),
+3.  [lisp-goodies](https://github.com/chalaev/lisp-goodies) (CL package named `:shalaev` and [version.el](https://github.com/chalaev/lisp-goodies/blob/master/packaged/version.el)),
 
 so LISP should be able to `require` these two packages.
 
@@ -37,7 +37,7 @@ tar xjfv [cl-shalaev.tbz](https://github.com/chalaev/lisp-goodies/raw/master/pac
 tar xjfv [simple-log.tbz](https://github.com/chalaev/cl-simple-logger/raw/master/packaged/simple-log.tbz) &#x2013;directory=$HOME/quicklisp/local-projects/
 
 
-<a id="org0cfa78a"></a>
+<a id="orgc011cee"></a>
 
 # Quick start – usage example
 
@@ -63,18 +63,17 @@ In this way the sender is notified that the message has been received,
 and now the sender must delete the sub-directory `sdir` in order to allow others to send messages to LISP code.
 
 
-<a id="orgd2f8b75"></a>
+<a id="orge42b9e0"></a>
 
 # Files
 
 1.  [signal-handler.org](signal-handler.org) is the main file containing most of the code with comments,
 2.  [Makefile](Makefile) compiles [generated/example.lisp](generated/example.lisp) into `generated/example.bin` and launches it,
-3.  [make.org](make.org) contains log messages displayed by sucessfull `make` command,
-4.  [helpers/\*](helpers/) assist compilation, and
-5.  [packaged/signal-handler.tbz](packaged/signal-handler.tbz) is the package archive.
+3.  [make.org](make.org) contains log messages displayed by sucessfull `make` command, and
+4.  [packaged/signal-handler.tbz](packaged/signal-handler.tbz) is the package archive.
 
 
-<a id="orgd86d960"></a>
+<a id="org909ce94"></a>
 
 # Motivation
 
@@ -82,7 +81,7 @@ and now the sender must delete the sub-directory `sdir` in order to allow others
 which is much more than I need to satisfy my modest needs: I just need simple text message exchange between `sbcl` and other programs (including shell scripts).
 
 
-<a id="orgda40b44"></a>
+<a id="org266fca1"></a>
 
 # License
 

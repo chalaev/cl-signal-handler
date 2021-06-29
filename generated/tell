@@ -4,7 +4,7 @@ PIDfile=$dir/pid
 lock=$dir/acceptor
 message=$lock/by
 
-function waitForFile {
+function get_PID {
 local i=20
 local r
 while [ ! -f $1 ]  && [ $i -ge 0 ] || r=`awk '{if($2=="ok"){print $1}}' $1` && [ -z $r ]  ; do
@@ -13,22 +13,19 @@ while [ ! -f $1 ]  && [ $i -ge 0 ] || r=`awk '{if($2=="ok"){print $1}}' $1` && [
 done
 echo $r
 }
-lispPID=`waitForFile $PIDfile`
-if [ -z $lispPID ]; then
-    echo "lisp code did not create PID file, exiting"
-    exit -1
-else
 
+lispPID=$(get_PID $PIDfile)
 echo "lisp code says that its PID=$lispPID"
-i=20
-while  [ $i -ge 0 ] && ! (mkdir "$lock" 2>/dev/null && echo "Let me tell you something: the time now is `date`" > $message) ; do
+
+function send_message {
+local i=20
+while  [ $i -ge 0 ] && ! (mkdir "$lock" 2>/dev/null && echo "$1" > $message) ; do
     echo "$((21-$i))th attempt to mkdir failed -- waiting until the lock is removed"
     i=$(($i - 1))
     sleep .1
 done
 
-echo "kill -s USR1 $lispPID"
-kill -s USR1 $lispPID
+kill -s USR1 $(get_PID $PIDfile)
 
 echo "Now let us ensure that our message has been delivered."
 j=20
@@ -43,6 +40,13 @@ if [ $j -ge 0 ]; then
 else
     echo "The message was NOT delivered!"
 fi
+}
 
-echo "all done, ready for more messages"
-fi
+echo ""
+send_message "hello"
+sleep 1
+echo ""
+send_message "I love you"
+sleep 1
+echo ""
+send_message "bye"

@@ -1,3 +1,5 @@
+*open this file in emacs or watch it RAW on github*
+
 signal-handler> make
 
 * make begins

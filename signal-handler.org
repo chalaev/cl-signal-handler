@@ -37,8 +37,7 @@ External code is supposed to use some sort of =directory-lock= environment that
 2. leaves a message there, and
 3. before leaving the lock-environment, send ~kill~ signal to our lisp code.
 
-So actually the first thing that our =sighandler= is going to check is
-if any of the lock-directories were actually created.
+So the first thing that our =sighandler= is going to check is if any of the lock-directories were created.
 (There can actually be several of these named =active-hooks= below, and they all need to be addressed.)
 
 =cffi:defcallback= immediately compiles its argument (the specified function):
@@ -70,7 +69,7 @@ Now once we have defined the callback by =cffi:defcallback=, we can use it (not 
 (ifn lock-dir (log sl:error "pid-FN: undefined lock-dir")
 (merge-paths lock-dir "pid")))
 (defun start(&optional (root-directory (uiop:temporary-directory)))
-(iff *started* (log sl:debug "already started, won't start for the second time")
+(iff *started* (log sl:debug "sigkill handler already started")
 (setf lock-dir (ensure-directories-exist (uiop:ensure-directory-pathname root-directory)))
 (cffi:with-foreign-object (act '(:struct saType))
   (setf (cffi:foreign-slot-value act '(:struct saType) 'handler) (cffi:callback sighandler))
@@ -84,7 +83,8 @@ Let the killers know whom to kill by creating ~pid~ file:
 (setf *started* t))
 (defun stop()
 (delete-file (pid-FN))
-(log sl:info "erased ~a" (pid-FN)))
+(log sl:info "erased ~a" (pid-FN))
+(setf *started* nil))
 #+END_SRC
 I noticed that log messages were temporarily blocked with this code, and suspect that
 this may happen due to the wrong (too strict) value of =iolib.syscalls:sa-siginfo=.
@@ -121,34 +121,58 @@ Forgetting hooks:
 
 Every time the kill-signal is sent, the following (toy) function will be called:
 #+BEGIN_SRC lisp :tangle generated/example.lisp
+(defvar working nil)
+(defvar stop-the-server (bt:make-condition-variable))
+(defun stop() 
+  (setf working nil)
+  (bt:condition-notify stop-the-server))
+
 (defun wachter(message)
   "An example kill-signal handler. Its argument is a message from the killer."
-  (logE sl:info "my killer told me: ~s" message) T)
+(logE sl:info "my killer told me: ~s" message)
+(when (string= message "bye")
+  (logE sl:info "stopping the server")
+  (stop))
+ T)
 #+END_SRC
 ←  handler must return T.
 
-Note that the compilation fails if we move any code outside of the =main= function:
+The compilation may fail if we move any code outside of the =main= function:
 #+BEGIN_SRC lisp :tangle generated/example.lisp
-(defvar time-interval 3)
 (defun main()
-(sh:start (merge-pathnames (make-pathname :directory "tmp")  "sbcl.lock"))
+(setf sl:out-streams (list *standard-output*))
+(setf working t)
+(sl:start); starting the log server
+(logE sl:info "starting kill-signal server")
+(sh:start (make-pathname :directory '(:absolute "tmp")  :name "sbcl" :type "lock"))
 #+END_SRC
-← won't work without this command.
+← specifies the directory where
+1. one can find PID for killing, and
+2. where the messages for the lisp code should be left.
 
 #+BEGIN_SRC lisp :tangle generated/example.lisp
 (sh:register "acceptor" #'wachter)
-(logE sl:debug "started simple-handler service")
+(logE sl:info "will accept messages until someone tells me \"bye\"")
 #+END_SRC
+[[The thread...may also resume if]] interrupted by some external event or in other implementation-dependent circumstances: the caller
+must always test on waking that there is threading to be done, instead of assuming that it can go ahead.
+
+In other words, our lock is not absolute and can be unlocked for some unexpected (and uncontrolled) reason.
+This is why we have to write a loop:
+#+BEGIN_SRC lisp :tangle generated/example.lisp
+(loop while working do
+(let((SL-lock(bt:make-lock)))
+  (bt:with-lock-held(SL-lock)
+  (bt:condition-wait stop-the-server SL-lock)
+  (logE sl:debug "unlocked"))))
+#+END_SRC
+← if the unlocking was not authorized, we will lock it again and again in the loop.
 
 #+BEGIN_SRC lisp :tangle generated/example.lisp
-(setf sl:out-streams (list *standard-output*))
-(logE sl:info "will accept messages for the next ~d seconds" time-interval)
-(sleep time-interval)
-(logE sl:info "time is up, hook is removed, messages are ignored from now")
-(sleep 1)
-(sh:stop))
+(logE sl:info "stopping the server")
+(sh:stop); stopping signal handler
+(sl:stop)); stopping log server after flusshing remaining log messages
 #+END_SRC
-← the last command is essential – it cleans up.
 
 * Usage
 For this section we need compiled binary =example.bin= produced by =make=, see [[file:Makefile][Makefile]].
@@ -161,8 +185,9 @@ lock=$dir/acceptor
 message=$lock/by
 #+END_SRC
 
+=get_PID= will wait until the binary will launch and report its PID:
 #+BEGIN_SRC shell :tangle generated/tell
-function waitForFile {
+function get_PID {
 local i=20
 local r
 while [ ! -f $1 ]  && [ $i -ge 0 ] || r=`awk '{if($2=="ok"){print $1}}' $1` && [ -z $r ]  ; do
@@ -171,29 +196,27 @@ while [ ! -f $1 ]  && [ $i -ge 0 ] || r=`awk '{if($2=="ok"){print $1}}' $1` && [
 done
 echo $r
 }
-lispPID=`waitForFile $PIDfile`
-if [ -z $lispPID ]; then
-    echo "lisp code did not create PID file, exiting"
-    exit -1
-else
 #+END_SRC
 where we want to be sure that the first argument (before "ok") is written to the file =$PIDfile= completely.
 
+#+BEGIN_SRC shell :tangle generated/tell
+lispPID=$(get_PID $PIDfile)
+echo "lisp code says that its PID=$lispPID"
+#+END_SRC
+
 Now in case someone else is talking to =example.bin=, let us wait until (s)he removes the lock (that is, deletes the directory):
 #+BEGIN_SRC shell :tangle generated/tell
-echo "lisp code says that its PID=$lispPID"
-i=20
-while  [ $i -ge 0 ] && ! (mkdir "$lock" 2>/dev/null && echo "Let me tell you something: the time now is `date`" > $message) ; do
+function send_message {
+local i=20
+while  [ $i -ge 0 ] && ! (mkdir "$lock" 2>/dev/null && echo "$1" > $message) ; do
     echo "$((21-$i))th attempt to mkdir failed -- waiting until the lock is removed"
     i=$(($i - 1))
     sleep .1
 done
 #+END_SRC
-
 Let us now tell the LISP code (=example.bin=) to read the message:
 #+BEGIN_SRC shell :tangle generated/tell
-echo "kill -s USR1 $lispPID"
-kill -s USR1 $lispPID
+kill -s USR1 $(get_PID $PIDfile)
 #+END_SRC
 =example.bin= will let us know that the message was received by removing the file:
 #+BEGIN_SRC shell :tangle generated/tell
@@ -210,14 +233,20 @@ if [ $j -ge 0 ]; then
 else
     echo "The message was NOT delivered!"
 fi
+}
 #+END_SRC
-At this point we could send more messages by creating the file =$message= again and sending the =kill= signal.
-
-Or we could just finish the conversation by removing the lock (directory):
+Now let as send some messages:
 #+BEGIN_SRC shell :tangle generated/tell
-echo "all done, ready for more messages"
-fi
+echo ""
+send_message "hello"
+sleep 1
+echo ""
+send_message "I love you"
+sleep 1
+echo ""
+send_message "bye"
 #+END_SRC
+
 ** emacs
 *To be written*
 
@@ -230,3 +259,6 @@ BTW, ~DBus~ is available in elisp:
 #+BEGIN_SRC elisp
 (featurep 'dbusbind)
 #+END_SRC
+
+#+RESULTS:
+: t
