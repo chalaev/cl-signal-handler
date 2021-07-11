@@ -3,14 +3,23 @@ Change log for [[https://github.com/chalaev/cl-signal-handler][cl-signal-handler
 * Updates for easier usage
 For example, [[https://github.com/chalaev/cl-signal-handler][cl-signal-handler]] can be used to control a =Hunchentoot= [[https://github.com/chalaev/chalaev.com][web server]].
 
-** 06/29
+** code changes/improvements
+Redefined handler arguments. Old code using [[https://github.com/chalaev/cl-signal-handler][cl-signal-handler]] has to be updated at this point, see the [[file:signal-handler.org][example]].
+
+*** 07/11
+1. Removed some log messages.
+2. Removed =make.org=.
+3. Redefined handler arguments. Now its is handler's (which is the function – part of the hook) responsibility to delete the message file,
+   in order to let the clients know that the system is ready to accept new messages.
+
+** improved demo shell script
+*** 06/29
 1. removed =helpers/derive-version.el=
 2. improved [[file:generated/tell][tell]]: now the code can accept any number of messages
 
 ** 02/10
 1. renamed package =:server-log= → =:simple-log=
 2. improved usability, see [[file:generated/example.lisp][example.lisp]]
-
 
 * Almost stable
 This code was written 2+ years before it was packaged and published, so I do not expect it to be changed a lot.

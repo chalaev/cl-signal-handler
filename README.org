@@ -19,29 +19,26 @@ tar xjfv [[https://github.com/chalaev/cl-simple-logger/raw/master/packaged/simpl
 * Quick start – usage example
 =make= compiles the binary =example.bin= and launches it in background.
 It is a server that will "listen" for =kill= signals for a few seconds.
+[[file:make.log][Here is a typical make output.]]
 
-LISP services may register one or more ~hooks~ using =(sh:register dir func)=,
-where =dir= is the name of the lock (sub)directory.
+LISP services may register one or more ~hooks~ using =(sh:register dir func)=, where =dir= is the name of the lock (sub)directory.
 
 The shell script [[file:generated/tell][tell]] is a client that
 1. creates lock directory to let other clients know that they should not interfere until the current conversation with the server is over,
 2. saves a message in a file "by", and
 3. sends =kill= signal to the server thus letting it know that the message is ready to be read.
 
-After receiving the =kill= signal, the LISP code checks every hook it has.
-A hook is a =cons=; its =car= is the sub-directory name =sdir=.
-If this sub-directory exists, the hook is activated, and its =cdr= (which is a function)
-is called with a string argument read from the file named "by" residing in =sdir=.
+After receiving the =kill= signal, =signal-handler= package checks every hook it has. A hook is a =cons=; its =car= is the sub-directory name.
+If this sub-directory exists, the hook is activated, and its =cdr= (which is a function) is called with a single argument: the sub-directory name.
 
-After that the file "by" is erased by the LISP code.
-In this way the sender is notified that the message has been received,
-and now the sender must delete the sub-directory =sdir= in order to allow others to send messages to LISP code.
+After that the file "by" is erased by the LISP code (client that uses =signal-handler= package).
+In this way the client (shell script  [[file:generated/tell][tell]]) is notified that the message has been received, and now the server is ready to accept another request.
+The sender deletes the sub-directory =sdir= in order to allow others to send messages to LISP code.
 
 * Files
 1. [[file:signal-handler.org][signal-handler.org]] is the main file containing most of the code with comments,
-2. [[file:Makefile][Makefile]] compiles [[file:generated/example.lisp][generated/example.lisp]] into ~generated/example.bin~ and launches it,
-3. [[file:make.org][make.org]] contains log messages displayed by sucessfull =make= command, and
-4. [[file:packaged/signal-handler.tbz][packaged/signal-handler.tbz]] is the package archive.
+2. [[file:Makefile][Makefile]] compiles [[file:generated/example.lisp][generated/example.lisp]] into ~generated/example.bin~ and launches it, and
+3. [[file:packaged/signal-handler.tbz][packaged/signal-handler.tbz]] is the package archive.
 
 * Motivation
 [[https://github.com/death/dbus][dbus]] might have many fancy features, but on my computer =(ql:quickload :dbus)= downloads 55 other packages to satisfy [[https://github.com/death/dbus][dbus]]'es requirements,

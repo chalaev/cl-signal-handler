@@ -5,49 +5,61 @@ SBCL is free software, provided as is, with absolutely no warranty.
 It is mostly in the public domain; some portions are provided under
 BSD-style licenses.  See the CREDITS and COPYING files in the
 distribution for more information.
-; compiling file "/home/shalaev/quicklisp/local-projects/signal-handler/signal-handler.lisp" (written 29 JUN 2021 11:38:29 AM):
-; processing (DEFPACKAGE :SIGNAL-HANDLER ...)
+; compiling file "/home/shalaev/quicklisp/local-projects/signal-handler/def-SH.lisp" (written 11 JUL 2021 06:58:17 PM):
+; processing (UIOP/PACKAGE:DEFINE-PACKAGE :SIGNAL-HANDLER ...)
+
+; wrote /home/shalaev/.cache/common-lisp/sbcl-2.1.0-linux-x64/home/shalaev/quicklisp/local-projects/signal-handler/def-SH-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.012
+; compiling file "/home/shalaev/quicklisp/local-projects/signal-handler/macros.lisp" (written 11 JUL 2021 06:58:17 PM):
+; processing (DEFMACRO PROTECTED ...)
+
+; wrote /home/shalaev/.cache/common-lisp/sbcl-2.1.0-linux-x64/home/shalaev/quicklisp/local-projects/signal-handler/macros-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/home/shalaev/quicklisp/local-projects/signal-handler/signal-handler.lisp" (written 11 JUL 2021 06:58:17 PM):
 ; processing (IN-PACKAGE :SIGNAL-HANDLER)
-; processing (DEFVAR *STARTED* ...)
 ; processing (DEFVAR HOOKS ...)
-; processing (DEFVAR *CLIENTS* ...)
 ; processing (DEFUN LOG ...)
 ; processing (CFFI:DEFCSTRUCT SATYPE ...)
-; processing (DEFVAR LOCK-DIR ...)
-; processing (CFFI:DEFCALLBACK SIGHANDLER ...)
-; processing (DEFUN PID-FN ...)
-; processing (DEFUN START ...)
-; processing (DEFUN STOP ...)
+; processing (LET (STARTED LOCK-DIR) ...)
 ; processing (DEFUN REGISTER ...)
 ; processing (DEFUN FORGET ...)
 ; processing (DEFUN FORGET-ALL ...)
 
-; wrote /home/shalaev/.cache/common-lisp/sbcl-2.1.0-linux-x64/home/shalaev/quicklisp/local-projects/signal-handler/signal-handler-tmpGHU3ALSV.fasl
-; compilation finished in 0:00:00.036
-; compiling file "/home/shalaev/quicklisp/local-projects/signal-handler/example.lisp" (written 29 JUN 2021 11:38:29 AM):
-; processing (DEFPACKAGE :SIGNAL-HANDLER/EXAMPLE ...)
+; wrote /home/shalaev/.cache/common-lisp/sbcl-2.1.0-linux-x64/home/shalaev/quicklisp/local-projects/signal-handler/signal-handler-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.028
+; compiling file "/home/shalaev/quicklisp/local-projects/signal-handler/def-example.lisp" (written 11 JUL 2021 06:58:17 PM):
+; processing (UIOP/PACKAGE:DEFINE-PACKAGE :SIGNAL-HANDLER/EXAMPLE ...)
+
+; wrote /home/shalaev/.cache/common-lisp/sbcl-2.1.0-linux-x64/home/shalaev/quicklisp/local-projects/signal-handler/def-example-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/home/shalaev/quicklisp/local-projects/signal-handler/macros.lisp" (written 11 JUL 2021 06:58:17 PM):
+; processing (DEFMACRO PROTECTED ...)
+
+; wrote /home/shalaev/.cache/common-lisp/sbcl-2.1.0-linux-x64/home/shalaev/quicklisp/local-projects/signal-handler/macros-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/home/shalaev/quicklisp/local-projects/signal-handler/example.lisp" (written 11 JUL 2021 06:58:17 PM):
 ; processing (IN-PACKAGE :SIGNAL-HANDLER/EXAMPLE)
-; processing (DEFUN LOGE ...)
+; processing (DEFUN LOG ...)
 ; processing (DEFVAR WORKING ...)
 ; processing (DEFVAR STOP-THE-SERVER ...)
 ; processing (DEFUN STOP ...)
 ; processing (DEFUN WACHTER ...)
 ; processing (DEFUN MAIN ...)
 
-; wrote /home/shalaev/.cache/common-lisp/sbcl-2.1.0-linux-x64/home/shalaev/quicklisp/local-projects/signal-handler/example-tmpAAURSO1.fasl
+; wrote /home/shalaev/.cache/common-lisp/sbcl-2.1.0-linux-x64/home/shalaev/quicklisp/local-projects/signal-handler/example-tmp8V3J6PE9.fasl
 ; compilation finished in 0:00:00.004
 [undoing binding stack and other enclosing state... done]
 [performing final GC... done]
-[defragmenting immobile space... (fin,inst,fdefn,code,sym)=1493+1269+20633+21637+26246... done]
+[defragmenting immobile space... (fin,inst,fdefn,code,sym)=1494+1271+20685+21711+26287... done]
 [saving current Lisp image into /home/shalaev/quicklisp/local-projects/signal-handler/example.bin:
 writing 0 bytes from the read-only space at 0x50000000
 compressed 0 bytes into 8 at level -1
-writing 816 bytes from the static space at 0x50100000
-compressed 32768 bytes into 345 at level -1
-writing 35848192 bytes from the dynamic space at 0x1000000000
-compressed 35848192 bytes into 8008053 at level -1
-writing 2166784 bytes from the immobile space at 0x50200000
-compressed 2195456 bytes into 613997 at level -1
-writing 13680640 bytes from the immobile space at 0x52000000
-compressed 13697024 bytes into 4333497 at level -1
+writing 736 bytes from the static space at 0x50100000
+compressed 32768 bytes into 278 at level -1
+writing 36110336 bytes from the dynamic space at 0x1000000000
+compressed 36110336 bytes into 8047376 at level -1
+writing 2170880 bytes from the immobile space at 0x50200000
+compressed 2195456 bytes into 615296 at level -1
+writing 13746176 bytes from the immobile space at 0x52000000
+compressed 13762560 bytes into 4354312 at level -1
 done]

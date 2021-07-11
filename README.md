@@ -1,24 +1,24 @@
 
 # Table of Contents
 
-1.  [Description](#orgaa471e9)
-2.  [Prerequisites](#org260eb16)
-3.  [Quick start – usage example](#orgc011cee)
-4.  [Files](#orge42b9e0)
-5.  [Motivation](#org909ce94)
-6.  [License](#org266fca1)
+1.  [Description](#org191cb96)
+2.  [Prerequisites](#orgac461e8)
+3.  [Quick start – usage example](#org35ed014)
+4.  [Files](#orgd5542ae)
+5.  [Motivation](#org7cd101f)
+6.  [License](#org2d49fc4)
 
 Simple kill-signall message acceptor for [sbcl](http://www.sbcl.org/).
 
 
-<a id="orgaa471e9"></a>
+<a id="org191cb96"></a>
 
 # Description
 
 A simple way to send messages to LISP services.
 
 
-<a id="org260eb16"></a>
+<a id="orgac461e8"></a>
 
 # Prerequisites
 
@@ -37,15 +37,15 @@ tar xjfv [cl-shalaev.tbz](https://github.com/chalaev/lisp-goodies/raw/master/pac
 tar xjfv [simple-log.tbz](https://github.com/chalaev/cl-simple-logger/raw/master/packaged/simple-log.tbz) &#x2013;directory=$HOME/quicklisp/local-projects/
 
 
-<a id="orgc011cee"></a>
+<a id="org35ed014"></a>
 
 # Quick start – usage example
 
 `make` compiles the binary `example.bin` and launches it in background.
 It is a server that will "listen" for `kill` signals for a few seconds.
+[Here is a typical make output.](make.log)
 
-LISP services may register one or more `hooks` using `(sh:register dir func)`,
-where `dir` is the name of the lock (sub)directory.
+LISP services may register one or more `hooks` using `(sh:register dir func)`, where `dir` is the name of the lock (sub)directory.
 
 The shell script [tell](generated/tell) is a client that
 
@@ -53,27 +53,24 @@ The shell script [tell](generated/tell) is a client that
 2.  saves a message in a file "by", and
 3.  sends `kill` signal to the server thus letting it know that the message is ready to be read.
 
-After receiving the `kill` signal, the LISP code checks every hook it has.
-A hook is a `cons`; its `car` is the sub-directory name `sdir`.
-If this sub-directory exists, the hook is activated, and its `cdr` (which is a function)
-is called with a string argument read from the file named "by" residing in `sdir`.
+After receiving the `kill` signal, `signal-handler` package checks every hook it has. A hook is a `cons`; its `car` is the sub-directory name.
+If this sub-directory exists, the hook is activated, and its `cdr` (which is a function) is called with a single argument: the sub-directory name.
 
-After that the file "by" is erased by the LISP code.
-In this way the sender is notified that the message has been received,
-and now the sender must delete the sub-directory `sdir` in order to allow others to send messages to LISP code.
+After that the file "by" is erased by the LISP code (client that uses `signal-handler` package).
+In this way the client (shell script  [tell](generated/tell)) is notified that the message has been received, and now the server is ready to accept another request.
+The sender deletes the sub-directory `sdir` in order to allow others to send messages to LISP code.
 
 
-<a id="orge42b9e0"></a>
+<a id="orgd5542ae"></a>
 
 # Files
 
 1.  [signal-handler.org](signal-handler.org) is the main file containing most of the code with comments,
-2.  [Makefile](Makefile) compiles [generated/example.lisp](generated/example.lisp) into `generated/example.bin` and launches it,
-3.  [make.org](make.org) contains log messages displayed by sucessfull `make` command, and
-4.  [packaged/signal-handler.tbz](packaged/signal-handler.tbz) is the package archive.
+2.  [Makefile](Makefile) compiles [generated/example.lisp](generated/example.lisp) into `generated/example.bin` and launches it, and
+3.  [packaged/signal-handler.tbz](packaged/signal-handler.tbz) is the package archive.
 
 
-<a id="org909ce94"></a>
+<a id="org7cd101f"></a>
 
 # Motivation
 
@@ -81,7 +78,7 @@ and now the sender must delete the sub-directory `sdir` in order to allow others
 which is much more than I need to satisfy my modest needs: I just need simple text message exchange between `sbcl` and other programs (including shell scripts).
 
 
-<a id="org266fca1"></a>
+<a id="org2d49fc4"></a>
 
 # License
 

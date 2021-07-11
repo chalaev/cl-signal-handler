@@ -1,20 +1,26 @@
+# Uncomment for debugging:
+# OLD_SHELL := $(SHELL)
+# SHELL = $(warning Building $@$(if $<, (from $<))$(if $?, ($? newer)))$(OLD_SHELL)
+
 SBCL = ~/local/bin/sbcl
 # where my local packages are stored:
 quicklispDir = $$HOME/quicklisp/local-projects/signal-handler
 
-LFNs = signal-handler example
+LFNs = signal-handler example macros def-SH def-example
 LISPs = $(addsuffix .lisp, $(LFNs))
 package = $(LISPs) signal-handler.asd description.org version.org
 
-OFNs = signal-handler packaging
+OFNs = signal-handler packaging macros def-SH def-example
 ORGs = $(addsuffix .org, $(OFNs))
+
+genFroms=$(addprefix generated/from/, $(ORGs))
 
 #SH=/bin/sh
 
-all: quicklisp README.md packaged/signal-handler.tbz $(addprefix generated/from/, $(ORGs)) $(quicklispDir)/example.bin demo
-quicklisp: $(quicklispDir)/ $(addprefix $(quicklispDir)/, $(package)) $(addprefix generated/from/, $(ORGs))
+all: quicklisp README.md packaged/signal-handler.tbz $(genFroms) $(quicklispDir)/example.bin demo
+quicklisp: $(quicklispDir)/ $(addprefix $(quicklispDir)/, $(package)) $(genFroms)
 
-demo: $(quicklispDir)/example.bin generated/from/signal-handler.org
+demo: $(quicklispDir)/example.bin
 	-rm -r /tmp/sbcl.lock/acceptor
 	@$(quicklispDir)/example.bin & echo "Makefile--> PID=$$!"
 	@echo "\n*** will launch the DEMO now ***\n"
@@ -34,8 +40,8 @@ generated/description.org: description.org
 	cat $< > $@
 	-@chgrp tmp $@
 
-$(quicklispDir)/%.lisp: generated/from/signal-handler.org generated/from/packaging.org
-	cat generated/headers/$(notdir $@) generated/$(notdir $@) > $@
+$(quicklispDir)/%.lisp: $(genFroms)
+	cat generated/$(notdir $@) > $@
 	-@chgrp tmp $@
 
 $(quicklispDir)/%.asd: generated/from/packaging.org
@@ -46,7 +52,7 @@ $(quicklispDir)/%.org: %.org
 	cat $< > $@
 	-@chgrp tmp $@
 
-generated/from/%.org: %.org generated/from/ generated/headers/
+generated/from/%.org: %.org generated/from/
 	echo `emacsclient -e "(progn (require 'version) (printangle \"$<\"))"` | sed 's/"//g' > $@
 	-@chgrp tmp $@ `cat $@`
 
@@ -57,8 +63,6 @@ README.md: README.org
 	-@chmod a-x $@
 
 clean:
-	echo "asdf:clear-system forces recompilation of a previously loaded system"
-	-$(SBCL) --quit --eval '(progn (asdf:clear-system :signal-handler) (asdf:clear-system :signal-handler/example))'
 	-rm -r $(quicklispDir) generated
 
 .PHONY: clean quicklisp all demo

@@ -1,4 +1,5 @@
-(defsystem "signal-handler"
+(asdf:defsystem "signal-handler"
+ :class :package-inferred-system
  :description "listen to the USR1 kill signal and read the killer's message"
  :long-description #.(uiop:read-file-string (uiop/pathname:subpathname *load-pathname* "description.org"))
  :author "Oleg Shalaev"
@@ -6,10 +7,12 @@
  :licence "MIT"
  :version (:read-file-line "version.org")
  :depends-on (:iolib :cffi :simple-log :uiop :shalaev)
- :components ((:file "signal-handler")))
+ :serial t
+ :components ((:file "def-SH") (:file "macros") (:file "signal-handler")))
 
-(defsystem "signal-handler/example"
-:depends-on (:signal-handler :simple-log :shalaev)
+(asdf:defsystem "signal-handler/example"
+:class :package-inferred-system
+:depends-on (:signal-handler :simple-log :shalaev :uiop :bordeaux-threads)
 
 :build-operation  "program-op"
 :build-pathname "example.bin"
@@ -20,4 +23,5 @@
 :mailto "oleg@chalaev.com"
 :licence "MIT"
 :version (:read-file-line "version.org")
-:components ((:file "example")))
+:serial t
+:components ((:file "def-example") (:file "macros") (:file "example")))

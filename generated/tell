@@ -25,7 +25,7 @@ while  [ $i -ge 0 ] && ! (mkdir "$lock" 2>/dev/null && echo "$1" > $message) ; d
     sleep .1
 done
 
-kill -s USR1 $(get_PID $PIDfile)
+kill -s USR1 $lispPID
 
 echo "Now let us ensure that our message has been delivered."
 j=20

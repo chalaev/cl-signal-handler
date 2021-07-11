@@ -1,0 +1,65 @@
+signal-handler> make
+[ -d $HOME/quicklisp/local-projects/signal-handler/ ] || mkdir -p $HOME/quicklisp/local-projects/signal-handler/
+echo `emacsclient -e "(progn (require 'version) (printangle \"signal-handler.org\"))"` | sed 's/"//g' > generated/from/signal-handler.org
+cat generated/signal-handler.lisp > $HOME/quicklisp/local-projects/signal-handler/signal-handler.lisp
+cat generated/example.lisp > $HOME/quicklisp/local-projects/signal-handler/example.lisp
+cat generated/macros.lisp > $HOME/quicklisp/local-projects/signal-handler/macros.lisp
+cat generated/def-SH.lisp > $HOME/quicklisp/local-projects/signal-handler/def-SH.lisp
+cat generated/def-example.lisp > $HOME/quicklisp/local-projects/signal-handler/def-example.lisp
+cat generated/signal-handler.asd > $HOME/quicklisp/local-projects/signal-handler/signal-handler.asd
+cat description.org > $HOME/quicklisp/local-projects/signal-handler/description.org
+cat version.org > $HOME/quicklisp/local-projects/signal-handler/version.org
+tar jcfv packaged/signal-handler.tbz --directory=$HOME/quicklisp/local-projects/signal-handler/..  --exclude=example.bin signal-handler/
+signal-handler/
+signal-handler/def-SH.lisp
+signal-handler/def-example.lisp
+signal-handler/version.org
+signal-handler/example.lisp
+signal-handler/macros.lisp
+signal-handler/signal-handler.lisp
+signal-handler/macros.lisp~
+signal-handler/signal-handler.asd
+signal-handler/description.org
+*** COMPILING THE BINARY ***
+~/local/bin/sbcl --quit --eval "(asdf:make :signal-handler/example)" 2> generated/example.bin.2.log > generated/example.bin.1.log
+
+*** COMPILED THE BINARY ***
+
+rm -r /tmp/sbcl.lock/acceptor
+rm: невозможно удалить '/tmp/sbcl.lock/acceptor': Нет такого файла или каталога
+make: [Makefile:24: demo] Ошибка 1 (игнорирование)
+Makefile--> PID=17029
+
+*** will launch the DEMO now ***
+
+generated/tell
+lisp code says that its PID=17029
+
+Now let us ensure that our message has been delivered.
+1th check: waiting for the LISP code that must delete /tmp/sbcl.lock/acceptor/by
+2th check: waiting for the LISP code that must delete /tmp/sbcl.lock/acceptor/by
+3th check: waiting for the LISP code that must delete /tmp/sbcl.lock/acceptor/by
+4th check: waiting for the LISP code that must delete /tmp/sbcl.lock/acceptor/by
+5th check: waiting for the LISP code that must delete /tmp/sbcl.lock/acceptor/by
+After 5/10 seconds, the message was delivered.
+07/11 18:58:24.000 INFO SHE starting kill-signal server...
+07/11 18:58:24.000 INFO SH :signal-handler is now ready to treat kill signals.
+07/11 18:58:24.000 INFO SHE will accept messages until someone tells me "bye"
+07/11 18:58:24.064 INFO SHE my killer told me: "hello", now let me digest that...
+07/11 18:58:24.484 INFO SHE I worked hard for 0.42 seconds, and now I am ready for more requests
+07/11 18:58:24.484 DEBUG SHE unlocked
+
+Now let us ensure that our message has been delivered.
+1th check: waiting for the LISP code that must delete /tmp/sbcl.lock/acceptor/by
+2th check: waiting for the LISP code that must delete /tmp/sbcl.lock/acceptor/by
+After 2/10 seconds, the message was delivered.
+07/11 18:58:25.580 INFO SHE my killer told me: "I love you", now let me digest that...
+07/11 18:58:25.764 INFO SHE I worked hard for 0.18 seconds, and now I am ready for more requests
+07/11 18:58:25.764 DEBUG SHE unlocked
+
+Now let us ensure that our message has been delivered.
+1th check: waiting for the LISP code that must delete /tmp/sbcl.lock/acceptor/by
+07/11 18:58:26.788 DEBUG SHE unlocked
+07/11 18:58:26.788 INFO SHE stopping the server
+07/11 18:58:26.788 INFO SH erased /tmp/sbcl.lock/pid
+After 1/10 seconds, the message was delivered.

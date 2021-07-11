@@ -432,32 +432,29 @@ WARNING: redefining UIOP/BACKWARD-DRIVER:VERSION-COMPATIBLE-P in DEFUN
 WARNING: redefining PERFORM (#<STANDARD-CLASS ASDF/BUNDLE:IMAGE-OP> #<STANDARD-CLASS ASDF/SYSTEM:SYSTEM>) in DEFMETHOD
 
 ; file: /home/shalaev/quicklisp/local-projects/signal-handler/signal-handler.lisp
-; in: CFFI:DEFCALLBACK SIGHANDLER
+; in: DEFUN START => CFFI:DEFCALLBACK SIGHANDLER
 ;     (CFFI:DEFCALLBACK SIGNAL-HANDLER::SIGHANDLER
 ;         :VOID
 ;         ((SIGNUM :INT) (SIGNAL-HANDLER::INFO :POINTER)
 ;          (SIGNAL-HANDLER::PTR :POINTER))
 ;       (DECLARE (INTEGER SIGNUM))
 ;       (WHEN (= 10 SIGNUM)
-;         (SHALAEV/MACROS:NEEDS ((SIGNAL-HANDLER::ACTIVE-HOOKS # #))
-;                               (DOLIST
-;                                   (SIGNAL-HANDLER::HOOK
-;                                    SIGNAL-HANDLER::ACTIVE-HOOKS)
-;                                 (LET #
-;                                   #
-;                                   #
-;                                   #)))))
-; --> PROGN CFFI-SYS:%DEFCALLBACK SETF LET* LET* ALIEN-SAP 
-; --> SB-ALIEN::ALIEN-LAMBDA SB-ALIEN-INTERNALS:ALIEN-CALLBACK 
-; --> SB-ALIEN-INTERNALS:%SAP-ALIEN SB-ALIEN::%ALIEN-CALLBACK-SAP LAMBDA 
-; --> FUNCTION 
+;         (DOLIST (SIGNAL-HANDLER::HOOK SIGNAL-HANDLER::HOOKS)
+;           (LET (#)
+;             (WHEN # # T)))))
+; --> PROGN CFFI-SYS:%DEFCALLBACK SETF LET* ALIEN-SAP SB-ALIEN::ALIEN-LAMBDA 
+; --> SB-ALIEN-INTERNALS:ALIEN-CALLBACK SB-ALIEN-INTERNALS:%SAP-ALIEN 
+; --> SB-ALIEN::%ALIEN-CALLBACK-SAP LAMBDA FUNCTION 
 ; ==>
 ;   (LET ((SIGNUM SIGNUM)
 ;         (SIGNAL-HANDLER::INFO SIGNAL-HANDLER::INFO)
 ;         (SIGNAL-HANDLER::PTR SIGNAL-HANDLER::PTR))
 ;     (DECLARE (INTEGER SIGNUM))
 ;     (BLOCK SIGNAL-HANDLER::SIGHANDLER
-;       (WHEN (= 10 SIGNUM) (SHALAEV/MACROS:NEEDS (#) (DOLIST # #)))))
+;       (WHEN (= 10 SIGNUM)
+;         (DOLIST (SIGNAL-HANDLER::HOOK SIGNAL-HANDLER::HOOKS)
+;           (LET #
+;             #)))))
 ; 
 ; caught STYLE-WARNING:
 ;   The variable INFO is defined but never used.
