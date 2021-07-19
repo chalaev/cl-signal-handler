@@ -1,3 +1,6 @@
+# do not delete these intermediate files (thus ignoring implicit rules):
+.PRECIOUS: generated/from/%.org generated/%.lisp generated/from generated/from/make
+
 # Uncomment for debugging:
 # OLD_SHELL := $(SHELL)
 # SHELL = $(warning Building $@$(if $<, (from $<))$(if $?, ($? newer)))$(OLD_SHELL)
@@ -5,56 +8,55 @@
 SBCL = ~/local/bin/sbcl
 # where my local packages are stored:
 quicklispDir = $$HOME/quicklisp/local-projects/signal-handler
+bareLispFNs = def-example def-SH example macros signal-handler
+QLlispFNs = $(addprefix $(quicklispDir)/, version.org description.org signal-handler.asd $(addsuffix .lisp, $(bareLispFNs)))
 
-LFNs = signal-handler example macros def-SH def-example
-LISPs = $(addsuffix .lisp, $(LFNs))
-package = $(LISPs) signal-handler.asd description.org version.org
+quicklisp: $(QLlispFNs)
+	@echo "to test the binary: make demo"
 
-OFNs = signal-handler packaging macros def-SH def-example
-ORGs = $(addsuffix .org, $(OFNs))
+$(quicklispDir)/%.asd: generated/from/package.org $(quicklispDir)/
+	cat generated/$(notdir $@) > $@
+	-@chgrp tmp $@
 
-genFroms=$(addprefix generated/from/, $(ORGs))
+$(quicklispDir)/%.lisp: generated/%.lisp $(quicklispDir)/
+	cat $< > $@
+	-@chgrp tmp $@
 
-#SH=/bin/sh
+generated/%.lisp: generated/from/%.org
+	-@chgrp tmp $@
 
-all: quicklisp README.md packaged/signal-handler.tbz $(genFroms) $(quicklispDir)/example.bin demo
-quicklisp: $(quicklispDir)/ $(addprefix $(quicklispDir)/, $(package)) $(genFroms)
+generated/from/%.org: %.org generated/from/
+	echo `emacsclient -e "(progn (require 'version) (printangle \"$<\"))"` | sed 's/"//g' > $@
+	-@chgrp tmp $@ `cat $@`
+
+$(quicklispDir)/%.org: %.org $(quicklispDir)/
+	cat $< > $@
+	-@chgrp tmp $@
+
+version.org: change-log.org
+	emacsclient -e "(progn (require 'version) (format-version \"$<\"))" | sed 's/"//g' > $@
+	@echo "← generated `date '+%m/%d %H:%M'` from [[file:$<][$<]]" >> $@
+	@echo "by [[https://github.com/chalaev/lisp-goodies/blob/master/packaged/version.el][version.el]]" >> $@
+	-@chgrp tmp $@
+
+#################### pre-07/17 code →
 
 demo: $(quicklispDir)/example.bin
-	-rm -r /tmp/sbcl.lock/acceptor
+	-[ -f /tmp/sbcl.lock/pid ] && awk '{print $$1}' /tmp/sbcl.lock/pid | xargs kill -9
+	-rm -r /tmp/sbcl.lock
 	@$(quicklispDir)/example.bin & echo "Makefile--> PID=$$!"
 	@echo "\n*** will launch the DEMO now ***\n"
 	generated/tell
 
-$(quicklispDir)/example.bin: quicklisp generated/description.org
+$(quicklispDir)/example.bin: quicklisp
 	@echo "*** COMPILING THE BINARY ***"
-	$(SBCL) --quit --eval "(asdf:make :signal-handler/example)" 2> generated/example.bin.2.log > generated/example.bin.1.log
+	$(SBCL) --quit --eval "(progn (asdf:load-system :signal-handler) (asdf:make :signal-handler/example))" 2> generated/example.bin.2.log > generated/example.bin.1.log
 	@echo "\n*** COMPILED THE BINARY ***\n"
 	-@chgrp tmp $@
 
 packaged/signal-handler.tbz: quicklisp packaged/
 	tar jcfv $@ --directory=$(quicklispDir)/..  --exclude=example.bin signal-handler/
 	-@chgrp tmp $@
-
-generated/description.org: description.org
-	cat $< > $@
-	-@chgrp tmp $@
-
-$(quicklispDir)/%.lisp: $(genFroms)
-	cat generated/$(notdir $@) > $@
-	-@chgrp tmp $@
-
-$(quicklispDir)/%.asd: generated/from/packaging.org
-	cat generated/$(notdir $@) > $@
-	-@chgrp tmp $@
-
-$(quicklispDir)/%.org: %.org
-	cat $< > $@
-	-@chgrp tmp $@
-
-generated/from/%.org: %.org generated/from/
-	echo `emacsclient -e "(progn (require 'version) (printangle \"$<\"))"` | sed 's/"//g' > $@
-	-@chgrp tmp $@ `cat $@`
 
 README.md: README.org
 	emacsclient -e '(progn (find-file "README.org") (org-md-export-to-markdown))'
@@ -63,15 +65,11 @@ README.md: README.org
 	-@chmod a-x $@
 
 clean:
-	-rm -r $(quicklispDir) generated
+	-$(SBCL) --quit --eval '(asdf:clear-system :signal-handler)'
+	-rm -r $(quicklispDir) generated version.org $$HOME/.cache/common-lisp/sbcl-*$(quicklispDir)
 
-.PHONY: clean quicklisp all demo
+.PHONY: clean
 
 %/:
-	[ -d $@ ] || mkdir -p $@
+	mkdir -p $@
 
-version.org: change-log.org
-	emacsclient -e "(progn (require 'version) (format-version \"$<\"))" | sed 's/"//g' > $@
-	@echo "← generated `date '+%m/%d %H:%M'` from [[file:$<][$<]]" >> $@
-	@echo "by [[https://github.com/chalaev/lisp-goodies/blob/master/packaged/version.el][version.el]]" >> $@
-	-@chgrp tmp $@

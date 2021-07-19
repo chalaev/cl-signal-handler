@@ -2,15 +2,15 @@
 
 * Main package
 #+BEGIN_SRC lisp :tangle generated/signal-handler.asd
-(asdf:defsystem "signal-handler"
- :class :package-inferred-system
+(asdf:defsystem #:signal-handler
  :description "listen to the USR1 kill signal and read the killer's message"
  :long-description #.(uiop:read-file-string (uiop/pathname:subpathname *load-pathname* "description.org"))
  :author "Oleg Shalaev"
  :mailto "oleg@chalaev.com"
  :licence "MIT"
  :version (:read-file-line "version.org")
- :depends-on (:iolib :cffi :simple-log :uiop :shalaev)
+ :defsystem-depends-on ("asdf-package-system")
+ :depends-on (:iolib :cffi :simple-log :shalaev)
  :serial t
  :components ((:file "def-SH") (:file "macros") (:file "signal-handler")))
 #+END_SRC
@@ -19,8 +19,7 @@
 Declaring example package in the same (main) =.asd= file:
 #+BEGIN_SRC lisp :tangle generated/signal-handler.asd
 (asdf:defsystem "signal-handler/example"
-:class :package-inferred-system
-:depends-on (:signal-handler :simple-log :shalaev :uiop :bordeaux-threads)
+:depends-on (:signal-handler :simple-log :shalaev :bordeaux-threads)
 #+END_SRC
 
 3 next lines serve to assist with building binary image:
@@ -41,4 +40,3 @@ where ~:build-pathname~ is relative to the package placement
 :serial t
 :components ((:file "def-example") (:file "macros") (:file "example")))
 #+END_SRC
-← мой [[file:Makefile][Makefile]] устроен так, что [[~/quicklisp/local-projects/signal-handler/macros.lisp][~/quicklisp/../macros.lisp]] содержит

@@ -82,7 +82,7 @@ Sending kill signals has collateral effect – as if we evaluated =(bt:condition
 Let the killers know whom to kill by creating ~pid~ file:
 #+BEGIN_SRC lisp :tangle generated/signal-handler.lisp
 (echo-to-file (pid-FN) (format nil "~d ok" (sb-posix:getpid)))
-(log sl:info ":signal-handler is now ready to treat kill signals.")
+(log sl:info ":signal-handler is now ready to treat kill signals")
 (setf started t)))
 (defun stop()
   (delete-file (pid-FN))
@@ -103,7 +103,7 @@ It will be evaluated when someone
 1. creates a lock directory =name=, and then
 2. sends the kill signal:
 #+BEGIN_SRC lisp :tangle generated/signal-handler.lisp
-(if(find name hooks :key  #'car)
+(if(find name hooks :key #'car :test #'string=)
  (log sl:warning "will not re-register already active hook for ~s" name)
  (push (cons name hook-function) hooks)))
 #+END_SRC
@@ -115,162 +115,3 @@ Forgetting hooks:
   (setf hooks nil))
 #+END_SRC
 
-* Example
-#+BEGIN_SRC lisp :tangle generated/example.lisp
-(in-package :signal-handler/example)
-(defun log (type &rest message)
-    (apply #'sl:log
-      (cons type (cons (concat "SHE " (car message)) (cdr message)))))
-#+END_SRC
-
-#+BEGIN_SRC lisp :tangle generated/example.lisp
-(defvar working nil)
-(defvar stop-the-server (bt:make-condition-variable))
-(defun stop() 
-  (setf working nil)
-  (bt:condition-notify stop-the-server))
-#+END_SRC
-
-Every time the kill-signal is sent, the following (toy) function will be called.
-It is important that =wachter= finishes as fast as possible; otherwise we risk =Segmantation Fault= error:
-#+BEGIN_SRC lisp :tangle generated/example.lisp
-(defun wachter(request-directory)
-  "An example kill-signal handler. Its argument is a message from the killer."
-(let((FN(merge-pathnames "by" request-directory)) (work-time(/ (random 50) 100.0)))
-(with-open-file(s FN)
-(ifn-let((message(read-line s nil))) (log sl:error "could not find the file ~a" FN)
-(iff(string= message "bye") (progn (delete-file FN) (stop))
-(log sl:info "my killer told me: ~s, now let me digest that..." message)
-(sleep work-time)
-(log sl:info "I worked hard for ~A seconds, and now I am ready for more requests" work-time)
-(delete-file FN))))))
-#+END_SRC
-← let everyone now we are ready for new requests
-
-The compilation may fail if we move any code outside of the =main= function:
-#+BEGIN_SRC lisp :tangle generated/example.lisp
-(defun main()
-(setf sl:out-streams (list *standard-output*))
-(setf working t)
-(sl:start); starting the log server
-(log sl:info "starting kill-signal server...")
-(sh:start (make-pathname :directory '(:absolute "tmp"); ← have to use /tmp because cannot write to /var/lock
-:name "sbcl" :type "lock"))
-#+END_SRC
-← specifies the directory where
-1. one can find PID for killing, and
-2. where the messages for the lisp code should be left.
-
-#+BEGIN_SRC lisp :tangle generated/example.lisp
-(sh:register "acceptor" #'wachter)
-(log sl:info "will accept messages until someone tells me \"bye\"")
-#+END_SRC
-[[The thread...may also resume if]] interrupted by some external event or in other implementation-dependent circumstances: the caller
-must always test on waking that there is threading to be done, instead of assuming that it can go ahead.
-
-In other words, our lock is not absolute and can be unlocked for some unexpected (and uncontrolled) reason.
-This is why we have to write a loop:
-#+BEGIN_SRC lisp :tangle generated/example.lisp
-(loop while working do
-(let((SL-lock(bt:make-lock)))
-  (bt:with-lock-held(SL-lock)
-  (bt:condition-wait stop-the-server SL-lock)
-  (log sl:debug "unlocked"))))
-#+END_SRC
-← if the unlocking was not authorized, we will lock it again and again in the loop.
-Otherwise the lock was released due to the 
-
-#+BEGIN_SRC lisp :tangle generated/example.lisp
-(log sl:info "stopping the server")
-(sh:stop); stopping signal handler
-(sl:stop)); stopping log server after flusshing remaining log messages
-#+END_SRC
-
-* Usage
-For this section we need compiled binary =example.bin= produced by =make=, see [[file:Makefile][Makefile]].
-** Terminal (shell)
-First of all let us ensure that =example.bin= started and created the file with its PID:
-#+BEGIN_SRC shell :tangle generated/tell :shebang "#!/bin/bash"
-dir=/tmp/sbcl.lock
-PIDfile=$dir/pid
-lock=$dir/acceptor
-message=$lock/by
-#+END_SRC
-
-=get_PID= will wait until the binary will launch and report its PID:
-#+BEGIN_SRC shell :tangle generated/tell
-function get_PID {
-local i=20
-local r
-while [ ! -f $1 ]  && [ $i -ge 0 ] || r=`awk '{if($2=="ok"){print $1}}' $1` && [ -z $r ]  ; do
-	i=$(($i - 1))
-	sleep .1
-done
-echo $r
-}
-#+END_SRC
-where we want to be sure that the first argument (before "ok") is written to the file =$PIDfile= completely.
-
-#+BEGIN_SRC shell :tangle generated/tell
-lispPID=$(get_PID $PIDfile)
-echo "lisp code says that its PID=$lispPID"
-#+END_SRC
-
-Now in case someone else is talking to =example.bin=, let us wait until (s)he removes the lock (that is, deletes the directory):
-#+BEGIN_SRC shell :tangle generated/tell
-function send_message {
-local i=20
-while  [ $i -ge 0 ] && ! (mkdir "$lock" 2>/dev/null && echo "$1" > $message) ; do
-    echo "$((21-$i))th attempt to mkdir failed -- waiting until the lock is removed"
-    i=$(($i - 1))
-    sleep .1
-done
-#+END_SRC
-Let us now tell the LISP code (=example.bin=) to read the message:
-#+BEGIN_SRC shell :tangle generated/tell
-kill -s USR1 $lispPID
-#+END_SRC
-=example.bin= will let us know that the message was received by removing the file:
-#+BEGIN_SRC shell :tangle generated/tell
-echo "Now let us ensure that our message has been delivered."
-j=20
-while [ -f $message ]  && [ $j -ge 0 ] ; do
-    echo "$((21-$j))th check: waiting for the LISP code that must delete $message"
-    j=$(($j - 1))
-    sleep .1
-done
-rmdir $lock
-if [ $j -ge 0 ]; then
-    echo "After $((40-$i-$j))/10 seconds, the message was delivered."
-else
-    echo "The message was NOT delivered!"
-fi
-}
-#+END_SRC
-Now let as send some messages:
-#+BEGIN_SRC shell :tangle generated/tell
-echo ""
-send_message "hello"
-sleep 1
-echo ""
-send_message "I love you"
-sleep 1
-echo ""
-send_message "bye"
-#+END_SRC
-
-** emacs
-*To be written*
-
-For killing use
-#+BEGIN_SRC elisp
-(signal-process PID 'sigusr1)
-#+END_SRC
-
-BTW, ~DBus~ is available in elisp:
-#+BEGIN_SRC elisp
-(featurep 'dbusbind)
-#+END_SRC
-
-#+RESULTS:
-: t

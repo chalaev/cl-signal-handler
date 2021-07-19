@@ -1,7 +1,7 @@
 Simple kill-signall message acceptor for [[http://www.sbcl.org/][sbcl]].
 
 * Description
-A simple way to send messages to LISP services.
+A simple way to send messages to LISP-powered servers.
 
 * Prerequisites
 This code needs:
@@ -41,9 +41,9 @@ The sender deletes the sub-directory =sdir= in order to allow others to send mes
 3. [[file:packaged/signal-handler.tbz][packaged/signal-handler.tbz]] is the package archive.
 
 * Motivation
-[[https://github.com/death/dbus][dbus]] might have many fancy features, but on my computer =(ql:quickload :dbus)= downloads 55 other packages to satisfy [[https://github.com/death/dbus][dbus]]'es requirements,
-which is much more than I need to satisfy my modest needs: I just need simple text message exchange between ~sbcl~ and other programs (including shell scripts).
+[[https://github.com/death/dbus][dbus]] might have many fancy features, but on my computer =(ql:quickload :dbus)= downloads 55 other packages to satisfy the requirements,
+which is much more than I need for my modest needs: I just need a simple text message exchange between ~sbcl~ and shell scripts.
 
 * License
-This code is released under [[https://mit-license.org/][MIT license]].
+This code is released under [[file:LICENSE.txt][MIT license]].
 

@@ -35,7 +35,7 @@
   (iolib.syscalls:sigaction iolib.syscalls:sigusr1 act (cffi-sys:null-pointer)))
 
 (echo-to-file (pid-FN) (format nil "~d ok" (sb-posix:getpid)))
-(log sl:info ":signal-handler is now ready to treat kill signals.")
+(log sl:info ":signal-handler is now ready to treat kill signals")
 (setf started t)))
 (defun stop()
   (delete-file (pid-FN))
@@ -44,7 +44,7 @@
 (defun register (name hook-function)
 (declare (string name))
 
-(if(find name hooks :key  #'car)
+(if(find name hooks :key #'car :test #'string=)
  (log sl:warning "will not re-register already active hook for ~s" name)
  (push (cons name hook-function) hooks)))
 

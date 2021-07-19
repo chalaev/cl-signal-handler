@@ -6,6 +6,12 @@ For example, [[https://github.com/chalaev/cl-signal-handler][cl-signal-handler]]
 ** code changes/improvements
 Redefined handler arguments. Old code using [[https://github.com/chalaev/cl-signal-handler][cl-signal-handler]] has to be updated at this point, see the [[file:signal-handler.org][example]].
 
+*** 07/18
+1. renamed =packaging.org= → [[file:package.org][package.org]]
+2. moved piece of [[file:signal-handler.org][signal-handler.org]] to (newly created) [[file:example.org][example.org]]
+3. improved [[file:Makefile][Makefile]]
+4. added [[file:LICENSE.txt][LICENSE.txt]]
+
 *** 07/11
 1. Removed some log messages.
 2. Removed =make.org=.
